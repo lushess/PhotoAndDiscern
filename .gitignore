@@ -1,0 +1,14 @@
+.vs/
+.vscode/
+x64/
+DebugConfig/
+*/x64/
+*.env
+*.log
+*_log
+*.o
+*.obj
+*.user
+obj/
+*.uvguix.*
+*.ini
