@@ -26,6 +26,10 @@
 #include "Pages/AppFactory.h"
 #include "Utils/PageManager/PageManager.h"
 
+#ifdef USART_OUTPUT_DEBUG
+#include "usart.h"
+#endif
+
 #define ACCOUNT_SEND_CMD(ACT, CMD) \
 do{ \
     DataProc::ACT##_Info_t info; \
@@ -102,6 +106,7 @@ void App_Init()
     manager.SetGlobalLoadAnimType(PageManager::LOAD_ANIM_OVER_TOP);
 
     manager.Push("Pages/Startup");
+		UDEBUG("页面加载成功!!");
 }
 
 void App_Uninit()

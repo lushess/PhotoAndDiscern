@@ -95,7 +95,7 @@ void camera_refresh(void)
 
 					  LCD_Display_Dir(0);	
             ov_sta=0;						
-					  GPIOF_Pin0_5_BeUsedFor_SRAMEX();
+					  GPIOF_Pin0_5_BeUsedFor_SRAMEX();//由于SRAMEX和OV7670的FIFO有部分GPIO共用，设置GPIOF，Pin0_5用于SRAMEX
 					  EXTI_ITConfig(EXTI_Line7,ENABLE);
 						taskEXIT_CRITICAL();            //退出临界区
 			  }

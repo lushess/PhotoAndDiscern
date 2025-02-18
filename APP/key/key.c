@@ -2,6 +2,7 @@
 #include "SysTick.h"
 #include "lvgl/lvgl.h"
 #include <stdbool.h>
+#include "usart.h"	 
 
 /*******************************************************************************
 * 函 数 名         : KEY_Init
@@ -23,6 +24,8 @@ void KEY_Init(void)
 	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_IPU;	//上拉输入
 	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
 	GPIO_Init(KEY_Port,&GPIO_InitStructure);
+	
+	UDEBUG("KEY初始化完成！\r\n");
 }
 
 /*******************************************************************************

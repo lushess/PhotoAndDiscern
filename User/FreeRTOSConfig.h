@@ -191,7 +191,7 @@ do{\
 //支持静态内存
 #define configSUPPORT_STATIC_ALLOCATION					0					
 //系统所有总的堆大小
-#define configTOTAL_HEAP_SIZE					((size_t)(0x05000))  //使用外部SRAM
+#define configTOTAL_HEAP_SIZE			FREERTOS_HEAP_SIZE 
 
 /***************************************************************
              FreeRTOS与钩子函数有关的配置选项                                            

@@ -9,6 +9,7 @@
 /*********************
  *      INCLUDES
  *********************/
+#include "Config/Config.h"
 #include "lv_port_disp.h"
 #include "tftlcd.h"
 #include "lvgl/lvgl.h"
@@ -90,8 +91,8 @@ void lv_port_disp_init(void)
      */
 
     /* Example for 1) */
-    static lv_disp_draw_buf_t draw_buf_dsc_1 __attribute__((section("INRAM")));
-    static lv_color_t buf_1[COLOR_SIZE] __attribute__((section("INRAM")));                          /*A buffer for 10 rows*/
+    static lv_disp_draw_buf_t draw_buf_dsc_1 __INRAM;
+    static lv_color_t buf_1[COLOR_SIZE] __EXRAM;                          /*A buffer for 10 rows*/
     lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, COLOR_SIZE);   /*Initialize the display buffer*/
 
     /* Example for 2) */
@@ -110,7 +111,7 @@ void lv_port_disp_init(void)
      * Register the display in LVGL
      *----------------------------------*/
 
-    static lv_disp_drv_t disp_drv __attribute__((section("INRAM")));                         /*Descriptor of a display driver*/
+    static lv_disp_drv_t disp_drv __INRAM;                         /*Descriptor of a display driver*/
     lv_disp_drv_init(&disp_drv);                    /*Basic initialization*/
 
     /*Set up the functions to access to your display*/

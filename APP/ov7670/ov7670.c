@@ -6,7 +6,6 @@
 #include "usart.h"			 
 #include "sccb.h"	
 #include "exti.h"
-
  	    
 //初始化OV7670
 //返回0:成功
@@ -59,6 +58,7 @@ u8 OV7670_Init(void)
 	{
 	   	SCCB_WR_Reg(ov7670_init_reg_tbl[i][0],ov7670_init_reg_tbl[i][1]);
   	}
+		
    	return 0x00; 	//ok
 } 
 ////////////////////////////////////////////////////////////////////////////

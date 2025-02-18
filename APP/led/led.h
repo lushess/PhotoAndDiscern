@@ -5,7 +5,8 @@
 
 /*  LED时钟端口、引脚定义 */
 #define LED_PORT 			GPIOC   
-#define LED_PIN 			(GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7)
+//#define LED_PIN 			(GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7)
+#define LED_PIN 			(GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_5|GPIO_Pin_7) //防止复用导致数据干扰
 #define LED_PORT_RCC		RCC_APB2Periph_GPIOC
 
 

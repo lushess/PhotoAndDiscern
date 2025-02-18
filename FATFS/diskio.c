@@ -326,7 +326,7 @@ void *ff_memalloc (UINT size)
 //ÊÍ·ÅÄÚ´æ
 void ff_memfree (void* mf)		 
 {
-	free(mf);
+	return (void)free((void*)mf);
 }
 
 

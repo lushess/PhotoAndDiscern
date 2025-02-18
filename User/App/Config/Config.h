@@ -49,4 +49,19 @@
 #endif //CONFIG_LVGL_USE_MALLOC_ENABLE
 
 
-#endif
+#define USART_OUTPUT_DEBUG_ENABLE 1
+#if USART_OUTPUT_DEBUG_ENABLE
+#define USART_OUTPUT_DEBUG
+#endif //USART_OUTPUT_DEBUG_ENABLE
+
+#define FREERTOS_HEAP_SIZE 	((size_t)(0x00005000))
+
+/* 内存使用记录 */
+/* EXRAM */
+#define EXRAM_TOTAL         			((size_t)(0x00200000))
+#define EXRAM_HEAP_SECTION 				((size_t)(0x001F0000))
+//#define EXRAM_LVGL_BUFF           ((size_t)((240*400/10))
+//#define EXRAM_LEAVE   						(EXRAM_TOTAL - EXRAM_HEAP_SECTION - EXRAM_FREERTOS_HEAP_SIZE - EXRAM_LVGL_BUFF)
+
+
+#endif //__CONFIG_H

@@ -45,6 +45,7 @@ void EN25QXX_Init(void)
 	EN25QXX_CS=1;			//SPI FLASH不选中
 	SPI2_Init();		   			//初始化SPI		
 	EN25QXX_TYPE=EN25QXX_ReadID();	//读取FLASH ID.
+	UDEBUG("SPIFLASH初始化完成！\r\n");
 
 }
 

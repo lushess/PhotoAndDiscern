@@ -23,11 +23,11 @@
 #ifndef __PM_LOG_H
 #define __PM_LOG_H
 
-#define PAGE_MANAGER_USE_LOG 1
+#include "Config/Config.h"
 
-#if !defined(ARDUINO) && PAGE_MANAGER_USE_LOG
-#include <stdio.h>
-#  define _PM_LOG(format, ...)      printf("[PM]" format "\r\n", ##__VA_ARGS__)
+#ifdef USART_OUTPUT_DEBUG
+#include "usart.h"
+#  define _PM_LOG(format, ...)      UDEBUG("[PM]" format, ##__VA_ARGS__)
 #  define PM_LOG_INFO(format, ...)  //_PM_LOG("[Info] " format, ##__VA_ARGS__)
 #  define PM_LOG_WARN(format, ...)  _PM_LOG("[Warn] " format, ##__VA_ARGS__)
 #  define PM_LOG_ERROR(format, ...) _PM_LOG("[Error] " format, ##__VA_ARGS__)

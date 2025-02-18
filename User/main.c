@@ -83,7 +83,7 @@ static void AppTaskCreate(void)
                         (UBaseType_t    )2, /* 任务的优先级 */
                         (TaskHandle_t*  )&LEDsysRunning_Handle);/* 任务控制块指针 */ 
 	 if(pdPASS == xReturn)
-    printf("创建LEDsysRunning任务成功!\r\n");
+    UDEBUG("创建LEDsysRunning任务成功!\r\n");
 	 
 	xReturn = xTaskCreate((TaskFunction_t )camera_refresh,  /* 任务入口函数 */
                         (const char*    )"camera_refresh",/* 任务名字 */
@@ -92,7 +92,7 @@ static void AppTaskCreate(void)
                         (UBaseType_t    )1, /* 任务的优先级 */
                         (TaskHandle_t*  )&camera_refresh_Handle);/* 任务控制块指针 */ 		
   if(pdPASS == xReturn)
-    printf("创建camera_refresh任务成功!\r\n");
+    UDEBUG("创建camera_refresh任务成功!\r\n");
 
 	  xReturn = xTaskCreate((TaskFunction_t )photo,  /* 任务入口函数 */
                         (const char*    )"photo",/* 任务名字 */
@@ -102,7 +102,7 @@ static void AppTaskCreate(void)
                         (TaskHandle_t*  )&photo_Handle);/* 任务控制块指针 */ 
 		
   if(pdPASS == xReturn)
-    printf("创建photo任务成功!\r\n");
+    UDEBUG("创建photo任务成功!\r\n");
 	
 	 xReturn = xTaskCreate((TaskFunction_t )discern,  /* 任务入口函数 */
                         (const char*    )"discern",/* 任务名字 */
@@ -112,7 +112,7 @@ static void AppTaskCreate(void)
                         (TaskHandle_t*  )&discern_Handle);/* 任务控制块指针 */ 
 		
   if(pdPASS == xReturn)
-    printf("创建discern任务成功!\r\n");
+    UDEBUG("创建discern任务成功!\r\n");
 	
 //	xReturn = xTaskCreate((TaskFunction_t )lv_task,  /* 任务入口函数 */
 //				(const char*    )"lv_task",/* 任务名字 */
@@ -121,17 +121,17 @@ static void AppTaskCreate(void)
 //				(UBaseType_t    )30, /* 任务的优先级 */
 //				(TaskHandle_t*  )&LV_Task_Handle);/* 任务控制块指针 */ 
 //	if(pdPASS == xReturn)
-//    printf("创建lv_task任务成功!\r\n");	
+//    UDEBUG("创建lv_task任务成功!\r\n");	
 
 	
 	lv_init();
-	printf("lvgl初始化成功!\r\n");
+	UDEBUG("lvgl初始化成功!\r\n");
 	lv_port_disp_init();
-	printf("lvgl屏幕初始化成功!\r\n");
+	UDEBUG("lvgl屏幕初始化成功!\r\n");
 //	lv_port_indev_init();
-//	printf("lvgl设备初始化成功!\r\n");
+//	UDEBUG("lvgl设备初始化成功!\r\n");
 //	lv_port_fs_init();
-//	printf("lvgl文件系统初始化成功!\r\n");
+//	UDEBUG("lvgl文件系统初始化成功!\r\n");
 	App_Init_Wrapper();
 
   vTaskDelete(NULL); //删除AppTaskCreate任务
@@ -162,7 +162,7 @@ static void LEDsysRunning(void)//用于指示系统处于运行
 }
 
 //const u8*LMODE_TBL[5]={"Auto","Sunny","Cloudy","Office","Home"};
-//const u8*EFFECTS_TBL[7]={"Normal","Negative","B&W","Redish","Greenish","Bluish","Antique"};	//7种特效 
+//const u8*EFFECTS_TBL[7]={"Normal","Negative","B&W","Redish","Greenish","Bluish","Antique"};	//7种特效
 
 int main()
 {
@@ -170,12 +170,19 @@ int main()
   BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
 	
 	SysTick_Init(72);
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);  //中断优先级分组 分4组，4位用于强占优先级最大15
-	LED_Init();
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);  //中断优先级分组4，4位用于抢占优先级最大15
 	USART1_Init(9600);
+	LED_Init();
 	TFTLCD_Init();			//LCD初始化
 	KEY_Init();
 	EN25QXX_Init();				//初始化EN25Q128
+	
+	char *ExramTest = malloc(sizeof("EXRAM测试"));
+	if (NULL == ExramTest) UDEBUG("EXRAM堆内存分配失败");
+	snprintf(ExramTest, sizeof("EXRAM测试"), "EXRAM测试");
+	UDEBUG("EXRAM测试地址:%p;内容:%s",ExramTest,ExramTest); // 测试EXRAM是否正确读写
+	free ((void*)ExramTest);
 	
 	FRONT_COLOR=RED;//设置字体为红色 
 	BACK_COLOR=BLACK;
@@ -185,15 +192,12 @@ int main()
 	LCD_ShowFont12Char(10, 10, "普中科技");
 	LCD_ShowFont12Char(10, 30, "www.prechin.net");    
 	LCD_ShowFont12Char(10, 50, "摄像头应用--OV7670");
+	
 	i=OV7670_Init();
-	printf("i=%d\n",i);
-	while(OV7670_Init())//初始化OV7670
-	{
-		LCD_ShowString(10,80,tftlcd_data.width,tftlcd_data.height,16,"OV7670 Error!");
-		delay_ms(200);
-		LCD_Fill(10,80,239,206,WHITE);
-		delay_ms(200);
-	}
+	if (0 == i)
+		UDEBUG("OV7670初始化完成\r\n");
+	else UDEBUG("OV7670初始化失败\r\n");
+
  	LCD_ShowString(10,80,tftlcd_data.width,tftlcd_data.height,16,"OV7670 OK!     ");
 	delay_ms(1500);	 
 	OV7670_Light_Mode(0);
@@ -218,7 +222,7 @@ int main()
   /* 启动任务调度 */           
   if(pdPASS == xReturn)
 	{
-		printf("开始调度\r\n");
+		UDEBUG("开始调度\r\n");
     vTaskStartScheduler();   /* 启动任务，开启调度 */	 
 	}
   else

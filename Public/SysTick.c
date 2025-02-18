@@ -1,7 +1,7 @@
 #include "SysTick.h"
 
-static u8  fac_us=0;							//us延时倍乘数			   
-static u16 fac_ms=0;							//ms延时倍乘数
+volatile static u8  fac_us=0;							//us延时倍乘数			   
+volatile static u16 fac_ms=0;							//ms延时倍乘数
 
 
 //初始化延迟函数
@@ -26,7 +26,7 @@ void delay_us(u32 nus)
 	do
 	{
 		temp=SysTick->CTRL;
-	}while((temp&0x01)&&!(temp&(1<<16)));		//等待时间到达   
+	}while((temp&SysTick_CTRL_ENABLE_Msk)&&!(temp&SysTick_CTRL_COUNTFLAG_Msk));		//等待时间到达   
 	SysTick->CTRL&=~SysTick_CTRL_ENABLE_Msk;	//关闭计数器
 	SysTick->VAL =0X00;      					 //清空计数器	 
 }
@@ -46,7 +46,7 @@ void delay_ms(u16 nms)
 	do
 	{
 		temp=SysTick->CTRL;
-	}while((temp&0x01)&&!(temp&(1<<16)));		//等待时间到达   
+	}while((temp&SysTick_CTRL_ENABLE_Msk)&&!(temp&SysTick_CTRL_COUNTFLAG_Msk));		//等待时间到达   
 	SysTick->CTRL&=~SysTick_CTRL_ENABLE_Msk;	//关闭计数器
 	SysTick->VAL =0X00;       					//清空计数器	  	    
 } 

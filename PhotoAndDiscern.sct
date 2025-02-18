@@ -10,14 +10,19 @@ LR_IROM1 0x08000000 0x00080000  {    ; load region size_region
   }
   RW_IRAM1 0x20000000 0x00010000  {  ; RW data
    *.o (STACK)  
-   *.o (INRAM)
+   *(INRAM)
    stm32f10x_rcc.o (+RW)
+   SysTick.o (+RW) ;若不分配到内部sram则其节区会被自动分配到外部sram导致卡死,因为链接器会自动选择容量更大的空间来分配变量
+   ;usart.o (+RW)
+   ;sram.o (+RW)
+   ;ov7670.o (+RW +ZI)
+   ;sccb.o (+RW +ZI)
    .ANY (+RW +ZI)
   }
    RW_ERAM 0x68000000 0x00200000  {  ; RW data
    *.o (HEAP)
-   *.o (EXRAM)  
-   .ANY (+RW +ZI)
+   *(EXRAM)  
+   ;.ANY (+RW +ZI)
   }
 }
 
