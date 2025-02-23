@@ -34,18 +34,22 @@
 #define KEY_UP 1
 #define KEY_DOWN 2
 #define KEY_LEFT 3
-#define KEY_RIGHT 4  
+#define KEY_RIGHT 4 
 
-extern TaskHandle_t lv_key_scan_Handle ;
-
+extern volatile uint32_t lastkey;
 
 void KEY_Init(void);
 u8 KEY_Scan(u8 mode);
 
 u32 last_key(void);
-void lv_key_scan(void);
 bool key_pressed(void);
 int16_t get_new_moves(void);
 void update_enc_diff(void);
+
+
+extern TaskHandle_t key_scan_task_Handle ;
+void key_scan_task(void);
+void key_scan_task_create(void);
+
 
 #endif

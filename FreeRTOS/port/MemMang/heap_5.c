@@ -85,7 +85,7 @@
 #endif
 
 /* ÄÚ²¿¶ÑÕ» */
-static u8 Inheap[0x09000];
+static __INRAM u8 Inheap[FREERTOS_HEAP_SIZE];
 
 /* Block sizes must not get too small. */
 #define heapMINIMUM_BLOCK_SIZE    ( ( size_t ) ( xHeapStructSize << 1 ) )
@@ -104,8 +104,8 @@ typedef struct A_BLOCK_LINK
 
 HeapRegion_t xHeapRegions[] =
   {
-  	{ ( uint8_t * ) Inheap, 0x09000 }, // Defines a block of 0x09000 bytes starting at address 0x20000000/* SRAMIN */
-  	{ ( uint8_t * ) 0x68000000UL, 0x38000 }, // Defines a block of 0x38000 bytes starting at address of 0x68000000/* SRAMEX */
+  	{ ( uint8_t * ) Inheap, FREERTOS_HEAP_SIZE }, // Defines a block of FREERTOS_HEAP_SIZE bytes starting at address 0x20000000/* SRAMIN */
+  	{ ( uint8_t * ) 0x68000000UL, 0x0003F000 }, // Defines a block of 0x3F000 bytes starting at address of 0x68000000/* SRAMEX */
   	{ NULL, 0 }                // Terminates the array.
   };
 

@@ -4,12 +4,11 @@
 #include "usart.h"
 #include "Config/Config.h"
 
-#ifdef CONFIG_LVGL_USE_MALLOC
-    #include <stdlib.h>
-		#include <string.h>
-#else
-		#include "lvgl/lvgl.h"	 
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+#include <stdlib.h>
+#include <string.h>
+
+bmpinfo_t bmpinfo __INRAM = {NULL};
+
 
 static void fastsort(vu8 *arrayhead,vu8 *arrayend)
 {
@@ -43,7 +42,7 @@ static u16 RGB565ToHSV745(vu16 RGB565) //RGB565×ªHSV745
 	vu8 max = 0,min = 0;
 	vu8 r = 0,g = 0,b = 0;
   vu8 V=0,S=0;//¶¨ÒåHSVÖµ
-  __IO int8_t H=0;
+  volatile int8_t H=0;
 	r=R8FromRGB565(RGB565);g=G8FromRGB565(RGB565);b=B8FromRGB565(RGB565);
 	
 	max = r;
@@ -86,7 +85,7 @@ void CapLCDToGray(vu8 *GrayImage)//GrayImageÎªÏñËØÊı×éµÄÊ×µØÖ·Ö¸Õë¼´µÚÒ»¸öÔªËØ
 			*GrayImage++=(vu8)((r*19595+g*38469+b*7472)>>16);
 		}
 	}	
-	printf("¶ÁÈ¡»Ò¶ÈÍ¼³É¹¦£¡\r\n");
+	UDEBUG("¶ÁÈ¡»Ò¶ÈÍ¼³É¹¦£¡\r\n");
 }
 void CapLCDToBinary_ByRG565_HSV745IsTmp(vu8 *BinaryImage)//Î´ÊµÏÖ
 {
@@ -94,7 +93,7 @@ void CapLCDToBinary_ByRG565_HSV745IsTmp(vu8 *BinaryImage)//Î´ÊµÏÖ
 	int8_t h=0;
 	vu8 *TmpBinaryImage=BinaryImage;
 	vu16 Imagetmp,i,j;
-//	vu16 *hsv=(vu16 *)malloc(240*320);
+//	vu16 *hsv=(vu16 *)malloc(240*320*sizeof(vu16));
 //	vu16 *phsv=hsv;
 	LCD_Display_Dir(0);
   LCD_Set_Window(0,0,240-1,320-1);
@@ -129,7 +128,7 @@ void CapLCDToBinary_ByRG565_HSV745IsTmp(vu8 *BinaryImage)//Î´ÊµÏÖ
 	}		
 	
 //	myfree(SRAMEX,(void *)hsv);
-	printf("¶ÁÈ¡¶şÖµÍ¼³É¹¦£¡\r\n");
+	UDEBUG("¶ÁÈ¡¶şÖµÍ¼³É¹¦£¡\r\n");
 }
 //void CapLCDToGray(vu8 *GrayImage)//GrayImageÎªÏñËØÊı×éµÄÊ×µØÖ·Ö¸Õë¼´µÚÒ»¸öÔªËØ
 //{
@@ -149,7 +148,7 @@ void CapLCDToBinary_ByRG565_HSV745IsTmp(vu8 *BinaryImage)//Î´ÊµÏÖ
 //			*GrayImage++=(vu8)((0.2126*r)+(0.7152*g)+(0.0722*b));//È¡»Ò¶È,´æ´¢ÓÚGrayImage[76800]Êı×é
 //		}
 //	}	
-//	printf("¶ÁÈ¡»Ò¶ÈÍ¼³É¹¦£¡\r\n");
+//	UDEBUG("¶ÁÈ¡»Ò¶ÈÍ¼³É¹¦£¡\r\n");
 //}
 static u16 ArrayAddup(vu8 *Array,u8 Num)
 {
@@ -171,13 +170,10 @@ void OptionalFilter(vu8 *Image) //×ÔÊÊÓ¦Ñ¡ÔñĞÔÆ½»¬ÂË²¨£¬ÆäÄÚÓĞ9¸öËã×Ó£¬ÄÜÓĞĞ§±£Á
 	vu16 i,j;
 	vu32 variance[9]={0},Minvariance=0xffffffff;//variance´æ´¢Æä¶ÔÓ¦µÄÄ£°åÏñËØ·½²îºÍ
 	
-#ifdef CONFIG_LVGL_USE_MALLOC
-  vu8 *TmpImage=(vu8 *)malloc(240*320),*pTmpImage=TmpImage;
-	memset((void *)pTmpImage,255,240*320);
-#else
-	vu8 *TmpImage=(vu8 *)lv_malloc(240*320),*pTmpImage=TmpImage;
-	lv_memset((void *)pTmpImage,255,240*320);		 
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+  vu8 *TmpImage=(vu8 *)malloc(240*320*sizeof(vu8)),*pTmpImage=TmpImage;
+	if(TmpImage!=NULL)	UDEBUG("TmpImageÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",TmpImage);		
+ 	else UDEBUG("TmpImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	memset((void *)pTmpImage,255,240*320*sizeof(vu8));
 	
 	pTmpImage=TmpImage+240*2;pImage=Image+240*2; //Ö¸ÏòÏñËØÊı×éµÚÈıĞĞ
   for(j=3;j<=320-2;j++)
@@ -366,14 +362,11 @@ void OptionalFilter(vu8 *Image) //×ÔÊÊÓ¦Ñ¡ÔñĞÔÆ½»¬ÂË²¨£¬ÆäÄÚÓĞ9¸öËã×Ó£¬ÄÜÓĞĞ§±£Á
 			*pImage++=*pTmpImage;
 			pTmpImage++;
 		}
-	}	
+	}
 	
-	
-#ifdef CONFIG_LVGL_USE_MALLOC
+	UDEBUG("TmpImageÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",TmpImage);
   free((void *)TmpImage);
-#else
-	lv_free((void *)TmpImage);		 
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+
 }
 
 void MedianFilter(vu8 *Image)
@@ -382,18 +375,12 @@ void MedianFilter(vu8 *Image)
 	vu8 rank[9]={0};
 	vu16 i,j;
 	
-#ifdef CONFIG_LVGL_USE_MALLOC
-  vu8 *TmpImage=(vu8 *)malloc(240*320);
+  vu8 *TmpImage=(vu8 *)malloc(240*320*sizeof(vu8));
+	if(TmpImage!=NULL)	UDEBUG("TmpImageÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",TmpImage);		
+ 	else UDEBUG("TmpImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 	vu8 *pTmpImage=TmpImage,*pImage=Image;
-	memset((void *)pTmpImage,255,240*320);
-#else
-	vu8 *TmpImage=(vu8 *)lv_malloc(240*320);
-	vu8 *pTmpImage=TmpImage,*pImage=Image;
-	lv_memset((void *)pTmpImage,255,240*320);		 
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+	memset((void *)pTmpImage,255,240*320*sizeof(vu8));
 	
-	//	if(TmpImage!=NULL)	printf("ÖĞÖµÂË²¨ÄÚ´æ·ÖÅä³É¹¦\r\n");		
-//	else printf("ÖĞÖµÂË²¨ÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 	pTmpImage=TmpImage+240;pImage=Image+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
 	for(j=2;j<=320-1;j++)
 	{
@@ -449,24 +436,20 @@ void MedianFilter(vu8 *Image)
 		}
 	}	
 	
-#ifdef CONFIG_LVGL_USE_MALLOC
+	UDEBUG("TmpImageÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",TmpImage);
   free((void *)TmpImage);
-#else
-	lv_free((void *)TmpImage);		 
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	printf("ÖĞÖµÂË²¨³É¹¦£¡\r\n");
+
+	UDEBUG("ÖĞÖµÂË²¨³É¹¦£¡\r\n");
 }
 
-static __IO u8 *GrayGradient_Diffrential(vu8 *GrayImage,u8 GradientThreshold)//·µ»ØÊı×é´æ´¢ÆäÃ¿¸öÏñËØµÄÌİ¶È£¬ãĞÖµÒÔÉÏµÄÌİ¶ÈÖÃÎª255¡£ÔËÓÃË«Ïò²î·Ö´úÌæË«ÏòÎ¢·Ö
+static void GrayGradient_Diffrential(vu8 *Gradient,vu8 *GrayImage,u8 GradientThreshold)//·µ»ØÊı×é´æ´¢ÆäÃ¿¸öÏñËØµÄÌİ¶È£¬ãĞÖµÒÔÉÏµÄÌİ¶ÈÖÃÎª255¡£ÔËÓÃË«Ïò²î·Ö´úÌæË«ÏòÎ¢·Ö
 {
   vu8 *pGrayImage=GrayImage;
 	vu8 tmpGradientx,tmpGradienty;
 	vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu8 *Gradient=(vu8 *)malloc(240*320),*pGradient=Gradient;
-#else
-	vu8 *Gradient=(vu8 *)lv_malloc(240*320),*pGradient=Gradient;
-#endif /*CONFIG_LVGL_USE_MALLOC*/	
+	vu8 *pGradient=Gradient;
+	//vu8 *Gradient=(vu8 *)malloc(240*320*sizeof(vu8)),*pGradient=Gradient;
+	
 	for(j=1;j<=320-1;j++)
 	{
 	  for(i=1;i<=240-1;i++)
@@ -487,18 +470,14 @@ static __IO u8 *GrayGradient_Diffrential(vu8 *GrayImage,u8 GradientThreshold)//·
 			}				
 		}
 	}	
-	return Gradient;
 }
-static __IO u8 *GrayGradient_Roberts(vu8 *GrayImage,u8 GradientThreshold) //RobertsËã×ÓÇóÌİ¶È
+static void GrayGradient_Roberts(vu8 *Gradient,vu8 *GrayImage,u8 GradientThreshold) //RobertsËã×ÓÇóÌİ¶È
 {
-  vu8 *pGrayImage=GrayImage;
+  vu8 *pGrayImage=GrayImage,*pGradient=Gradient;
 	vu8 tmpGradientfirst,tmpGradientysecond;
 	vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu8 *Gradient=(vu8 *)malloc(240*320),*pGradient=Gradient;
-#else
-	vu8 *Gradient=(vu8 *)lv_malloc(240*320),*pGradient=Gradient;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+	//vu8 *Gradient=(vu8 *)malloc(240*320*sizeof(vu8)),*pGradient=Gradient;
+
 	for(j=1;j<=320-1;j++)
 	{
 	  for(i=1;i<=240-1;i++)
@@ -521,19 +500,15 @@ static __IO u8 *GrayGradient_Roberts(vu8 *GrayImage,u8 GradientThreshold) //Robe
 		}
 	}
 	
-	return Gradient;
 }
-static __IO u8 *GrayGradient_Sobel(vu8 *GrayImage,u8 GradientThreshold) //SobelËã×ÓÇóÌİ¶È
+static void GrayGradient_Sobel(vu8 *Gradient,vu8 *GrayImage,u8 GradientThreshold) //SobelËã×ÓÇóÌİ¶È
 {
 	vu8 rank[6]={0};
-	vu8 *pGrayImage=GrayImage;
+	vu8 *pGrayImage=GrayImage,*pGradient=Gradient;
 	vu16 i,j;
-	__IO int16_t tmpGradientH,tmpGradientyV;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu8 *Gradient=(vu8 *)malloc(240*320),*pGradient=Gradient;
-#else
-	vu8 *Gradient=(vu8 *)lv_malloc(240*320),*pGradient=Gradient;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+	volatile int16_t tmpGradientH,tmpGradientyV;
+	//vu8 *Gradient=(vu8 *)malloc(240*320*sizeof(vu8));
+
 	pGrayImage=GrayImage+240;pGradient=Gradient+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
 	for(j=2;j<=320-1;j++)
 	{
@@ -576,14 +551,13 @@ static __IO u8 *GrayGradient_Sobel(vu8 *GrayImage,u8 GradientThreshold) //SobelË
 			}			
 		}
 	}
-
-  return Gradient;
 }
 
-__IO u8 *GrayGradientToMask(vu8 *Gradient) //»ùÓÚÌİ¶ÈÍ¼ÖÆ×÷ÑÚÄ££¬ÕÚÑÚ²¿·ÖÎª255
-{
-   vu8 *Mask=Gradient,*pMask=Mask;
-	 vu16 i,j;
+void GrayGradientToMask(vu8 *Mask,vu8 *Gradient) //»ùÓÚÌİ¶ÈÍ¼ÖÆ×÷ÑÚÄ££¬ÕÚÑÚ²¿·ÖÎª255
+{ 
+  vu8 *pMask=Mask;
+	vu16 i,j;
+	memcpy((void*)Mask,(void*)Gradient,320*240*sizeof(vu8));
 	
 	for(j=1;j<=320;j++)
 	{
@@ -597,8 +571,6 @@ __IO u8 *GrayGradientToMask(vu8 *Gradient) //»ùÓÚÌİ¶ÈÍ¼ÖÆ×÷ÑÚÄ££¬ÕÚÑÚ²¿·ÖÎª255
 			else pMask++;
 		}
 	}
-	
-  return Mask;
 }
 
 void BinaryToEdge(vu8 *BinaryImage) //ÌÍ¿ÕÄÚ²¿µã·¨È¡µÃÇ°¾°±ßÑØ
@@ -606,11 +578,8 @@ void BinaryToEdge(vu8 *BinaryImage) //ÌÍ¿ÕÄÚ²¿µã·¨È¡µÃÇ°¾°±ßÑØ
   vu8 *pBinaryImage=BinaryImage;
 	vu8 rank[8]={0},ranknum;
   vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu8 *Edge=(vu8 *)malloc(240*320),*pEdge=Edge;
-#else
-	vu8 *Edge=(vu8 *)lv_malloc(240*320),*pEdge=Edge;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+	vu8 *Edge=(vu8 *)malloc(240*320*sizeof(vu8)),*pEdge=Edge;
+
 	pBinaryImage=BinaryImage+240;pEdge=Edge+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
   for(j=2;j<=320-1;j++)
 	{
@@ -663,29 +632,22 @@ void BinaryToEdge(vu8 *BinaryImage) //ÌÍ¿ÕÄÚ²¿µã·¨È¡µÃÇ°¾°±ßÑØ
       pEdge++;			
 		}	
 	}
-#ifdef CONFIG_LVGL_USE_MALLOC
+	
 	free((void *)Edge);
-#else
-	lv_free((void *)Edge);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
 }
 
-__IO u8 *ObjectMeasure_FromBinary(vu8 *BinaryImage,vu32 *ObjectSize)//±ê¼Ç¸÷¸öÎïÌå£¬²¢·µ»Ø£¬±ê¼ÇÖµ´Ó1¿ªÊ¼£¬ObjectSizeÊı×é¼ÇÂ¼Ã¿¸ö±ê¼ÇÎïÌåÕ¼ÓÃÏñËØ´óĞ¡
+void ObjectMeasure_FromBinary(vu8 *ObjectFlag,vu8 *BinaryImage,vu32 *ObjectSize)//±ê¼Ç¸÷¸öÎïÌå£¬²¢·µ»Ø£¬±ê¼ÇÖµ´Ó1¿ªÊ¼£¬ObjectSizeÊı×é¼ÇÂ¼Ã¿¸ö±ê¼ÇÎïÌåÕ¼ÓÃÏñËØ´óĞ¡
 {
-  vu8 *pBinaryImage=BinaryImage;
+  vu8 *pObjectFlag=ObjectFlag,*pBinaryImage=BinaryImage;
 	vu8 ObjectFillFlag=0;
 	vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu8 *ObjectFlag=(vu8 *)malloc(240*320),*pObjectFlag=ObjectFlag;
-#else
-	vu8 *ObjectFlag=(vu8 *)lv_malloc(240*320),*pObjectFlag=ObjectFlag;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+	//vu8 *ObjectFlag=(vu8 *)malloc(240*320*sizeof(vu8)),*pObjectFlag=ObjectFlag;
+
 	vu32 *pObjectSize=ObjectSize;
 	
 	pBinaryImage=BinaryImage+240;pObjectFlag=ObjectFlag+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
   for(j=2;j<=320-1;j++)
 	{
-		myASSERT(0==ObjectFillFlag);
 		for(i=2;i<=240-1;i++)
 		{
 			if(i==2)          //Ìø¹ıxÖáµÚÒ»¸öÏñËØ
@@ -712,10 +674,6 @@ __IO u8 *ObjectMeasure_FromBinary(vu8 *BinaryImage,vu32 *ObjectSize)//±ê¼Ç¸÷¸öÎï
 			}			
 		}
 	}
-	
-	
-	
-  return ObjectFlag;
 }
 
 
@@ -724,13 +682,9 @@ static void Corrode(vu8 *Image)
   vu8 ranknum,tmpimage;
 	vu8 rank[5]={0};
 	vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu8 *TmpImage=(vu8 *)malloc(240*320);
+	vu8 *TmpImage=(vu8 *)malloc(240*320*sizeof(vu8));
 	vu8 *pTmpImage=TmpImage,*pImage=Image;
-#else
-	vu8 *TmpImage=(vu8 *)lv_malloc(240*320);
-	vu8 *pTmpImage=TmpImage,*pImage=Image;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+
 	pTmpImage=TmpImage+240;pImage=Image+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
 	for(j=2;j<=320-1;j++)
 	{
@@ -797,11 +751,9 @@ static void Corrode(vu8 *Image)
 			}
 		}
 	}	
-#ifdef CONFIG_LVGL_USE_MALLOC
+	
 	free((void *)TmpImage);
-#else
-	lv_free((void *)TmpImage);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+
 }
 
 static void Expand(vu8 *Image)
@@ -809,13 +761,9 @@ static void Expand(vu8 *Image)
   vu8 ranknum,tmpimage;
 	vu8 rank[5]={0};
 	vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu8 *TmpImage=(vu8 *)malloc(240*320);
+	vu8 *TmpImage=(vu8 *)malloc(240*320*sizeof(vu8));
 	vu8 *pTmpImage=TmpImage,*pImage=Image;
-#else
-	vu8 *TmpImage=(vu8 *)lv_malloc(240*320);
-	vu8 *pTmpImage=TmpImage,*pImage=Image;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+
 	pTmpImage=TmpImage+240;pImage=Image+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
 	for(j=2;j<=320-1;j++)
 	{
@@ -882,11 +830,9 @@ static void Expand(vu8 *Image)
 			}
 		}
 	}	
-#ifdef CONFIG_LVGL_USE_MALLOC
+	
 	free((void *)TmpImage);
-#else
-	lv_free((void *)TmpImage);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+
 }
 
 void CloseOperation(vu8 *Image) //±ÕÔËËã
@@ -950,17 +896,13 @@ static u8 CalcThresold_MultiAverage(vu8 *GrayImage) //µü´úãĞÖµ·¨
 	return Thresold;
 }
 
-static __IO float *CalcGrayHist_Chance(vu8 *GrayImage) //¼ÆËã»Ò¶ÈÖ±·½Í¼£¬ÒÔ¸ÅÂÊ·Ö²¼µÄĞÎÊ½±£´æ
+static void CalcGrayHist_Chance(volatile float *histchance,vu8 *GrayImage) //¼ÆËã»Ò¶ÈÖ±·½Í¼£¬ÒÔ¸ÅÂÊ·Ö²¼µÄĞÎÊ½±£´æ
 {
 	vu8 *pGrayImage=GrayImage;
 	vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	float *histchance=(float *)malloc(256),*phistchance=histchance;
-  vu32 *hist=(vu32 *)malloc(256),*phist=hist;
-#else
-	float *histchance=(float *)lv_malloc(256),*phistchance=histchance;
-  vu32 *hist=(vu32 *)lv_malloc(256),*phist=hist;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+	volatile float *phistchance=histchance;
+  vu32 *hist=(vu32 *)malloc(256*sizeof(vu32)),*phist=hist;
+
 	for(j=1;j<=320;j++)
 	{
     for(i=1;i<=240;i++)
@@ -976,29 +918,19 @@ static __IO float *CalcGrayHist_Chance(vu8 *GrayImage) //¼ÆËã»Ò¶ÈÖ±·½Í¼£¬ÒÔ¸ÅÂÊ·
 		phist++;
 	}
 
-#ifdef CONFIG_LVGL_USE_MALLOC
 	free((void *)hist);
-#else
-	lv_free((void *)hist);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-  return histchance;
 }
 
-static __IO u8 *GrayImageMapping_ByChanceHist(vu8 *GrayImage)
+static void GrayImageMapping_ByChanceHist(vu8 *mapping,vu8 *GrayImage)
 {
 	vu16 i,j;
-
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu8 *mapping=(vu8 *)malloc(256);
   vu8 *pGrayImage=GrayImage,*pmapping=mapping;
-  __IO float *pChance=CalcGrayHist_Chance(pGrayImage),*pChanceTmp=pChance;
-	float *addupchance=(float *)malloc(256),*paddupchance=addupchance;
-#else
-	vu8 *mapping=(vu8 *)lv_malloc(256);
-  vu8 *pGrayImage=GrayImage,*pmapping=mapping;
-  __IO float *pChance=CalcGrayHist_Chance(pGrayImage),*pChanceTmp=pChance;
-	float *addupchance=(float *)lv_malloc(256),*paddupchance=addupchance;
-#endif /*CONFIG_LVGL_USE_MALLOC*/	
+  
+	volatile float *addupchance=(float *)malloc(256*sizeof(float)),*paddupchance=addupchance;
+	volatile float *histchance=(float *)malloc(256*sizeof(float)),*pChanceTmp=histchance;
+	CalcGrayHist_Chance(histchance,pGrayImage);
+		
+	
 	for(i=1;i<=256;i++)
 	{
 	  if(i==1)*paddupchance=*pChanceTmp;
@@ -1010,22 +942,20 @@ static __IO u8 *GrayImageMapping_ByChanceHist(vu8 *GrayImage)
 		paddupchance++;
 		pChanceTmp++;
 	}	
-#ifdef CONFIG_LVGL_USE_MALLOC
-  free((void *)pChance);
+	
+  free((void *)histchance);
   free((void *)addupchance);
-#else
-  lv_free((void *)pChance);
-  lv_free((void *)addupchance);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	return mapping;
 }
 
 void GrayEven(vu8 *GrayImage)  //»Ò¶ÈÍ¼¾ùÔÈ»¯
 {
 	vu8 image;
 	vu8 *pGrayImage=GrayImage;
-	vu8 *mapping=GrayImageMapping_ByChanceHist(pGrayImage),*pmapping=mapping;
 	vu16 i,j;
+	
+	vu8 *mapping=(vu8 *)malloc(256*sizeof(vu8)),*pmapping=mapping;
+	GrayImageMapping_ByChanceHist(mapping,pGrayImage);
+
 	
 	pGrayImage=GrayImage;
 	for(j=1;j<=320;j++)
@@ -1036,17 +966,15 @@ void GrayEven(vu8 *GrayImage)  //»Ò¶ÈÍ¼¾ùÔÈ»¯
 			*pGrayImage++=pmapping[image]; 			
 		}		
 	}
-#ifdef CONFIG_LVGL_USE_MALLOC
+	
   free((void *)mapping);
-#else
-  lv_free((void *)mapping);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+
 }
 
 void GrayChange_Linear(vu8 *GrayImage,float modulus,int8_t trans) //ÏßĞÔ¸Ä±ä»Ò¶ÈÖµ
 {
   vu8 *pGrayImage=GrayImage;
-//  vu8 *TmpGrayImage=(vu8 *)malloc(SRAMEX,240*320),*pTmpGrayImage=TmpGrayImage;
+//  vu8 *TmpGrayImage=(vu8 *)malloc(SRAMEX,240*320*sizeof(vu8)),*pTmpGrayImage=TmpGrayImage;
   vu16 i,j;
 	float tempimage;
 	
@@ -1063,17 +991,14 @@ void GrayChange_Linear(vu8 *GrayImage,float modulus,int8_t trans) //ÏßĞÔ¸Ä±ä»Ò¶È
 	}	
 }
 
-static u8 CalcThresold_SimpleTwoPeak_ByGrayHist(vu8 *GrayImage)
+static vu8 CalcThresold_SimpleTwoPeak_ByGrayHist(vu8 *GrayImage)
 {
 	vu8 histMaxGray,GrayForbinary=0,ifindpeak=0,jfindpeak=0;
 	vu8 *pGrayImage=GrayImage;
 	vu16 i,j,itmp,jtmp;
 	vu32 histMax=0,histSecond=0;
-#ifdef CONFIG_LVGL_USE_MALLOC
-  vu32 *hist=(vu32 *)malloc(256);
-#else
-  vu32 *hist=(vu32 *)lv_malloc(256);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+  vu32 *hist=(vu32 *)malloc(256*sizeof(vu32));
+
 	for(j=1;j<=320;j++)
 	{
     for(i=1;i<=240;i++)
@@ -1128,12 +1053,9 @@ static u8 CalcThresold_SimpleTwoPeak_ByGrayHist(vu8 *GrayImage)
   if(jfindpeak!=0&&jtmp!=0)GrayForbinary=(vu8)jtmp;
 	else if(ifindpeak!=0&&itmp!=256)GrayForbinary=(vu8)itmp;
 	
-#ifdef CONFIG_LVGL_USE_MALLOC
 	free((void *)hist);
-#else
-	lv_free((void *)hist);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	printf("µÃµ½»Ò¶ÈÍ¼ãĞÖµ£¡\r\n");
+
+	UDEBUG("µÃµ½»Ò¶ÈÍ¼ãĞÖµ£¡\r\n");
   return GrayForbinary; //·µ»ØÖµ×÷Îª¶şÖµ»¯µÄãĞÖµ
 }
 
@@ -1151,7 +1073,7 @@ void GrayToBinary(vu8 *GrayImage)
 			else *GrayImage++=0;				
 		}		
 	}	
-	printf("»ñÈ¡¶şÖµÍ¼³É¹¦£¡\r\n");
+	UDEBUG("»ñÈ¡¶şÖµÍ¼³É¹¦£¡\r\n");
 }
 void ShowGrayToLCD(vu8 *GrayImage) 
 {
@@ -1193,7 +1115,7 @@ __inline static u8 asb8(volatile int8_t val)
 void ImageAjust_Horizontal(vu8 *ImageToAjust,volatile int8_t *offset) 
 {
   vu8 *pImageToAjust=ImageToAjust;
-	__IO int8_t *poffset=offset;
+	volatile int8_t *poffset=offset;
 	vu16 i,j;
 	
 	for(j=1;j<=320;j++)
@@ -1237,15 +1159,12 @@ void ImageAjust_Horizontal(vu8 *ImageToAjust,volatile int8_t *offset)
 	}
 }
 //×İÏòÍ¶Ó°µ½xÖá
-__IO u16 *Projective_H(vu8 *BinaryImage)
+void Projective_H(vu16 *projection_x,vu8 *BinaryImage)
 {
 	vu8 *pBinaryImage=BinaryImage;
   vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-  vu16 *projection=(vu16 *)malloc(240),*pprojection=projection;
-#else
-  vu16 *projection=(vu16 *)lv_malloc(240),*pprojection=projection;
-#endif /*CONFIG_LVGL_USE_MALLOC*/	
+	vu16 *pprojection=projection_x;
+	
 	for(j=1;j<=320;j++)
 	{
     for(i=1;i<=240;i++)
@@ -1254,23 +1173,17 @@ __IO u16 *Projective_H(vu8 *BinaryImage)
 			pBinaryImage++;
 			pprojection++;
 		}	
-		pprojection=projection; //Ö¸ÕëÖ¸ÏòÍ¶Ó°Êı¾İ¿ªÍ·
+		pprojection=projection_x; //Ö¸ÕëÖ¸ÏòÍ¶Ó°Êı¾İ¿ªÍ·
 	}
 	
-  return projection;
 }
 //ºáÏòÍ¶Ó°µ½yÖá
-__IO u16 *Projective_V(vu8 *BinaryImage) 
+void Projective_V(vu16 *projection_y,vu8 *BinaryImage) 
 {
 	vu8 *pBinaryImage=BinaryImage;
   vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu16 *projection=(vu16 *)malloc(320);
-	vu16 *pprojection=projection;
-#else
-	vu16 *projection=(vu16 *)lv_malloc(320);
-	vu16 *pprojection=projection;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+	vu16 *pprojection=projection_y;
+
   for(j=1;j<=240;j++)
 	{
 		pBinaryImage=BinaryImage+j-1;//Ö¸ÕëÖ¸ÏòxÖáµÄÏÂÒ»¸öÏñËØ
@@ -1281,5 +1194,4 @@ __IO u16 *Projective_V(vu8 *BinaryImage)
 			pprojection++;
 		}	
 	}	
-	return projection;
 }

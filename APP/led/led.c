@@ -19,7 +19,7 @@ void LED_Init()
 	GPIO_Init(LED_PORT,&GPIO_InitStructure); 	   /* 初始化GPIO */
 	
 	GPIO_SetBits(LED_PORT,LED_PIN);   //将LED端口拉高，熄灭所有LED
-	UDEBUG("LED初始化完成！\r\n");
+	UDEBUG("LED初始化完成!\r\n");
 }
 
 

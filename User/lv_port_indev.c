@@ -59,8 +59,8 @@ lv_indev_t * indev_keypad;
 lv_indev_t * indev_encoder;
 lv_indev_t * indev_button;
 
-static int32_t encoder_diff __attribute__((section("INRAM")));
-static lv_indev_state_t encoder_state __attribute__((section("INRAM")));
+static int32_t encoder_diff __INRAM;
+static lv_indev_state_t encoder_state __INRAM;
 
 /**********************
  *      MACROS
@@ -332,17 +332,7 @@ static uint32_t keypad_get_key(void)
 /*Initialize your keypad*/
 static void encoder_init(void)
 {
-	  BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
-		
-    xReturn = xTaskCreate((TaskFunction_t )lv_key_scan,  /* 任务入口函数 */
-                        (const char*    )"lv_key_scan",/* 任务名字 */
-                        (uint16_t       )0x200,  /* 任务栈大小 */
-                        (void*          )NULL,/* 任务入口函数参数 */
-                        (UBaseType_t    )20, /* 任务的优先级 */
-                        (TaskHandle_t*  )&lv_key_scan_Handle);/* 任务控制块指针 */ 
-	 if(pdPASS == xReturn)
-    printf("创建lv_key_scan任务成功!\r\n");	
-	 
+	  key_scan_task_create();	 
 }
 
 /*Will be called by the library to read the encoder*/

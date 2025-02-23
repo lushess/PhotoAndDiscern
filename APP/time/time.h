@@ -2,6 +2,7 @@
 #define _time_H
 
 #include "system.h"
+extern u8 ov_frame;
 
 /********************基本定时器TIM参数定义，只限TIM6、7************/
 #define BASIC_TIM6 // 如果使用TIM7，注释掉这个宏即可

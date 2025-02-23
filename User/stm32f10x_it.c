@@ -26,12 +26,14 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "time.h"
-#include "lvgl/src/lv_conf_internal.h"
-#include "lv_port_disp.h"
+#include "Config/Config.h"
+#include "usart.h"
+//#include "lvgl/src/lv_conf_internal.h"
+//#include "lv_port_disp.h"
 
 #if !LV_TICK_CUSTOM
 #include "lvgl/src/hal/lv_hal_tick.h"
-#endif
+#endif //!LV_TICK_CUSTOM
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -63,7 +65,7 @@ void NMI_Handler(void)
   */
 void HardFault_Handler(void)
 {
-  printf("HardFault Error!\r\n");
+  UDEBUG("HardFault Error!\r\n");
   while (1)
   {
   }
@@ -157,6 +159,17 @@ void SysTick_Handler(void)
     #endif  /* INCLUDE_xTaskGetSchedulerState */
 }
 
+extern volatile u8 usart_dma_tx_busy_buf1;
+extern volatile u8 usart_dma_tx_busy_buf2;
+void DMA1_Channel4_IRQHandler(void)
+{
+		if(DMA_GetITStatus(DMA1_IT_TC4)){
+				DMA_ClearITPendingBit(DMA1_IT_TC4);
+				usart_dma_tx_busy_buf1 = 0;
+				usart_dma_tx_busy_buf2 = 0;
+		}
+}
+
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
@@ -181,7 +194,7 @@ void SysTick_Handler(void)
 //}
 
 
-u8 ov_frame=0; 	//统计帧数
+__INRAM static u8 ov_frame=0; 	//统计帧数
 
 /*******************************************************************************
 * 函 数 名         : TIM4_IRQHandler

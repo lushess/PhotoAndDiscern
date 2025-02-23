@@ -1,8 +1,9 @@
 #include "key.h"
 #include "SysTick.h"
-#include "lvgl/lvgl.h"
 #include <stdbool.h>
 #include "usart.h"	 
+#include "FreeRTOS.h"
+#include "task.h"
 
 /*******************************************************************************
 * 函 数 名         : KEY_Init
@@ -77,16 +78,14 @@ u8 KEY_Scan(u8 mode)
 
 
 
-static u32 lastkey = NULL;
+__INRAM volatile uint32_t lastkey  = NULL; //通过全局变量存储被按下的按钮
 
 u32 last_key(void)
 {
 	return lastkey;	
 }
 
-TaskHandle_t lv_key_scan_Handle = NULL;/* 创建任务句柄 */
-
-void lv_key_scan(void)
+void key_scan_task(void)
 {
 	TickType_t xLastWakeTime;
 	const TickType_t xPeriod = pdMS_TO_TICKS( 10 );
@@ -119,6 +118,21 @@ void lv_key_scan(void)
 	}
 }
 
+TaskHandle_t key_scan_task_Handle = NULL;/* 创建任务句柄 */
+void key_scan_task_create(void)
+{
+	BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
+		
+    xReturn = xTaskCreate((TaskFunction_t )key_scan_task,  /* 任务入口函数 */
+                        (const char*    )"key_scan_task",/* 任务名字 */
+                        (uint16_t       )0x200,  /* 任务栈大小 */
+                        (void*          )NULL,/* 任务入口函数参数 */
+                        (UBaseType_t    )20, /* 任务的优先级 */
+                        (TaskHandle_t*  )&key_scan_task_Handle);/* 任务控制块指针 */ 
+	 if(pdPASS == xReturn)
+    UDEBUG("创建key_scan_task任务成功!\r\n");
+}
+
 bool key_pressed(void)
 {	
   switch (lastkey)
@@ -136,7 +150,7 @@ bool key_pressed(void)
 	}
 }
 
-int16_t enc_diff = NULL;
+__INRAM volatile int16_t enc_diff = NULL;
 
 int16_t get_new_moves(void)
 {

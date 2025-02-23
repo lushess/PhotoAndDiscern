@@ -2,14 +2,10 @@
 #include "picture_tool.h"
 #include "tftlcd.h"
 #include "flash.h"
-#include "usart.h"
 #include "Config/Config.h"
-#ifdef CONFIG_LVGL_USE_MALLOC
-    #include <stdlib.h>
-		#include <string.h>
-#else
-		#include "lvgl/lvgl.h"	 
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+#include "usart.h"
+#include <stdlib.h>
+#include <string.h>
 
 static u8 calcCharacterBit(vu8 *CharacterMatrix)
 {
@@ -54,22 +50,12 @@ static u16 FindMaxNumFromArray(vu16 *array,vu16 size)
 	}
 	return flag;
 }
-static __IO u16 *CalcChangePoint_V(vu8 *BinaryImage) //ÓÃÓÚ¼ÇÂ¼×İÏòÌø±äµã£¬¹²240¸öÊı¾İ£¬ChangePointArray_V[x]ÆäÖĞxÎªÍ¼Æ¬ºá×ø±ê
+static void CalcChangePoint_V(vu16 *ChangePointArray_V,vu8 *BinaryImage) //ÓÃÓÚ¼ÇÂ¼×İÏòÌø±äµã£¬¹²240¸öÊı¾İ£¬ChangePointArray_V[x]ÆäÖĞxÎªÍ¼Æ¬ºá×ø±ê
 {
 	vu8 *TmpBinaryImage=BinaryImage;
   vu16 i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu16 *ChangePointArray_V=(vu16 *)malloc(240);
 	vu16 *pChangePointArray_V=ChangePointArray_V;
-//	memset((void*)ChangePointArray_V,0,240*2);
-#else
-	vu16 *ChangePointArray_V=(vu16 *)lv_malloc(240);
-	vu16 *pChangePointArray_V=ChangePointArray_V;
-//	lv_mem_set((void*)ChangePointArray_V,0,240*2);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	if(ChangePointArray_V!=NULL)	printf("ChangePointArray_VÄÚ´æ·ÖÅä³É¹¦\r\n");		
- 	else printf("ChangePointArray_VÄÚ´æ·ÖÅäÊ§°Ü\r\n");
-	
+
   for(j=1;j<=240;j++)
 	{
 		TmpBinaryImage=BinaryImage+j-1;
@@ -80,25 +66,13 @@ static __IO u16 *CalcChangePoint_V(vu8 *BinaryImage) //ÓÃÓÚ¼ÇÂ¼×İÏòÌø±äµã£¬¹²240
 		}	
     pChangePointArray_V++;		
 	}	
-	return ChangePointArray_V;
 }
 
-static __IO u16 *CalcChangePoint_H(vu8 *BinaryImage) //ÓÃÓÚ¼ÇÂ¼ºáÏòÌø±äµã£¬¹²320¸öÊı¾İ£¬ChangePointArray_H[y]ÆäÖĞyÎªÍ¼Æ¬×İ×ø±ê
+static void CalcChangePoint_H(vu16 *ChangePointArray_H,vu8 *BinaryImage) //ÓÃÓÚ¼ÇÂ¼ºáÏòÌø±äµã£¬¹²320¸öÊı¾İ£¬ChangePointArray_H[y]ÆäÖĞyÎªÍ¼Æ¬×İ×ø±ê
 {
 	vu8 *TmpBinaryImage=BinaryImage;
   vu16 i,j;
-
-#ifdef CONFIG_LVGL_USE_MALLOC
-  vu16 *ChangePointArray_H=(vu16 *)malloc(320);
 	vu16 *pChangePointArray_H=ChangePointArray_H;
-//	memset((void*)ChangePointArray_H,0,320*2);
-#else
-  vu16 *ChangePointArray_H=(vu16 *)lv_malloc(320);
-	vu16 *pChangePointArray_H=ChangePointArray_H;
-//	lv_mem_set((void*)ChangePointArray_H,0,320*2);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	if(ChangePointArray_H!=NULL)	printf("ChangePointArray_HÄÚ´æ·ÖÅä³É¹¦\r\n");		
- 	else printf("ChangePointArray_HÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 
   for(j=1;j<=320;j++)
 	{
@@ -110,7 +84,6 @@ static __IO u16 *CalcChangePoint_H(vu8 *BinaryImage) //ÓÃÓÚ¼ÇÂ¼ºáÏòÌø±äµã£¬¹²320
 		}	
     pChangePointArray_H++;		
 	}	
-	return ChangePointArray_H;
 }	
 /*
 //---------¸ù¾İºáÏòÌø±äµãÊı×é¼°×İÏòÌø±äµãÊı×é£¬·Ö¸î×Ö·û,×Ö·ûµÄ¸÷¸ö½çÏŞ±£´æÔÚxArray¼°yArray
@@ -152,20 +125,18 @@ void CharacterSegmentation(vu8 *BinaryImage,vu16 *xArray,vu16 *yArray)//xºÍyÊı×é
 	}
 }
 */
-static __IO u16 *CharacterSegmentation_x(vu8 *BinaryImage)//xÊı×éÃ¿Á½¸öÔªËØ·Ö±ğ±íÊ¾xleft,xright
+static void CharacterSegmentation_x(vu16 *xArray,vu8 *BinaryImage)//xÊı×éÃ¿Á½¸öÔªËØ·Ö±ğ±íÊ¾xleft,xright
 {
 	vu8 xstatus=0;  
   vu16 j;
-	vu16 *pChangePointArray_V=CalcChangePoint_V(BinaryImage),*pTmpChangePointArray_V=pChangePointArray_V;
-#ifdef CONFIG_LVGL_USE_MALLOC
-  vu16 *xArray=(vu16 *)malloc(240);
 	vu16 *pxArray=xArray;
-#else
-  vu16 *xArray=(vu16 *)lv_malloc(240);
-	vu16 *pxArray=xArray;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	if(xArray!=NULL)	printf("xArrayÄÚ´æ·ÖÅä³É¹¦\r\n");		
- 	else printf("xArrayÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	
+	vu16 *ChangePointArray_V=(vu16 *)malloc(240*sizeof(vu16));
+	if(ChangePointArray_V!=NULL)	UDEBUG("ChangePointArray_VÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_V);		
+ 	else UDEBUG("ChangePointArray_VÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	
+	vu16 *pChangePointArray_V=ChangePointArray_V;
+	CalcChangePoint_V(pChangePointArray_V,BinaryImage);
 
   for(j=1;j<=240;j++)
   {
@@ -182,27 +153,23 @@ static __IO u16 *CharacterSegmentation_x(vu8 *BinaryImage)//xÊı×éÃ¿Á½¸öÔªËØ·Ö±ğ±
 		pChangePointArray_V++;
 	}
 	*pxArray=0;  //×÷Îª¾²Ì¬Êı×éxArrayÌØÕ÷µã,µü´úÊ±ÅĞ¶ÏÒÔ×÷Í£Ö¹
-#ifdef CONFIG_LVGL_USE_MALLOC
-	free((void *)pTmpChangePointArray_V);
-#else
-	lv_free((void *)pTmpChangePointArray_V);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-  return xArray;
+	
+	UDEBUG("ChangePointArray_VÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_V);
+	free((void *)ChangePointArray_V);
+	
 }
-static __IO u16 *CharacterSegmentation_y(vu8 *BinaryImage)//yÊı×éÃ¿Á½¸öÔªËØ·Ö±ğ±íÊ¾yup,ylow
+static void CharacterSegmentation_y(vu16 *yArray,vu8 *BinaryImage)//yÊı×éÃ¿Á½¸öÔªËØ·Ö±ğ±íÊ¾yup,ylow
 {
   vu8 ystatus=0;
   vu16 i;
-	vu16 *pChangePointArray_H=CalcChangePoint_H(BinaryImage),*pTmpChangePointArray_H=pChangePointArray_H;
-#ifdef CONFIG_LVGL_USE_MALLOC
-  vu16 *yArray=(vu16 *)malloc(320);
 	vu16 *pyArray=yArray;
-#else
-  vu16 *yArray=(vu16 *)lv_malloc(320);
-	vu16 *pyArray=yArray;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	if(yArray!=NULL)	printf("yArrayÄÚ´æ·ÖÅä³É¹¦\r\n");		
- 	else printf("yArrayÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	
+	vu16 *ChangePointArray_H=(vu16 *)malloc(320*sizeof(vu16));
+	if(ChangePointArray_H!=NULL)	UDEBUG("ChangePointArray_VÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_H);		
+ 	else UDEBUG("ChangePointArray_HÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	
+	vu16 *pChangePointArray_H = ChangePointArray_H;
+	CalcChangePoint_H(ChangePointArray_H,BinaryImage);
 
   for(i=1;i<=320;i++)
   {
@@ -219,34 +186,35 @@ static __IO u16 *CharacterSegmentation_y(vu8 *BinaryImage)//yÊı×éÃ¿Á½¸öÔªËØ·Ö±ğ±
 		pChangePointArray_H++;
 	}
 	*pyArray=0;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	free((void *)pTmpChangePointArray_H);
-#else
-	lv_free((void *)pTmpChangePointArray_H);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-  return yArray;
+	
+	UDEBUG("ChangePointArray_HÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_H);
+	free((void *)ChangePointArray_H);
+
 }
 
-static __IO u8 *SaveCharacterImage(vu8 *BinaryImage)//CharacterImageÓÃÓÚ´æ´¢×Ö·ûÏñËØ£¬ÆäÖĞÓÃ0x0f¸ô¿ª
+static void SaveCharacterImage(vu8 *CharacterImage,vu8 *BinaryImage)//CharacterImageÓÃÓÚ´æ´¢×Ö·ûÏñËØ£¬ÆäÖĞÓÃ0x0f¸ô¿ª
 {
 	vu8 CharaterExistStatus=0;
 	vu8 *TmpBinaryImage=BinaryImage;
+	vu8 *pCharacterImage=CharacterImage;
+	vu8 *pCharacterImageTmp=CharacterImage;
 	vu16 xleft,xright,yup,ylow,deltax,deltay,i,j,tmpxleft,tmpdeltax;
-	vu16 *pCharacterSegmentation_x=CharacterSegmentation_x(TmpBinaryImage),*pTmpCharacterSegmentation_x=pCharacterSegmentation_x; 
-	TmpBinaryImage=BinaryImage;
-  vu16 *pCharacterSegmentation_y=CharacterSegmentation_y(TmpBinaryImage),*pTmpCharacterSegmentation_y=pCharacterSegmentation_y;
-  u32 shifty,shiftx;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu8 *CharacterImage=(vu8 *)malloc(240*320);
-	vu8 *pCharacterImage=CharacterImage,*pCharacterImageTmp=pCharacterImage;
-#else
-	vu8 *CharacterImage=(vu8 *)lv_malloc(240*320);
-	vu8 *pCharacterImage=CharacterImage,*pCharacterImageTmp=pCharacterImage;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	if(CharacterImage!=NULL)	printf("CharacterImageÄÚ´æ·ÖÅä³É¹¦\r\n");		
- 	else printf("CharacterImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	u32 shifty,shiftx;
+	
+	vu16 *xArray=(vu16 *)malloc(240*sizeof(vu16));
+	if(xArray!=NULL)	UDEBUG("xArrayÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",xArray);		
+ 	else UDEBUG("xArrayÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	
+	vu16 *pCharacterSegmentation_x=xArray; 
+	CharacterSegmentation_x(pCharacterSegmentation_x,TmpBinaryImage);
+	
+	vu16 *yArray=(vu16 *)malloc(320*sizeof(vu16));
+	if(yArray!=NULL)	UDEBUG("yArrayÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",yArray);		
+ 	else UDEBUG("yArrayÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	
+  vu16 *pCharacterSegmentation_y=yArray;
+	CharacterSegmentation_y(pCharacterSegmentation_y,TmpBinaryImage);
 
-//	my_mem_set((void *)CharacterImage,0,240*320);
 	while(*pCharacterSegmentation_y) //±éÀúyArrayÊı×é£¬Ã¿´Î¶ÁÈ¡Ò»×éyup,ylow
 	{
 		yup=*pCharacterSegmentation_y;
@@ -303,42 +271,35 @@ static __IO u8 *SaveCharacterImage(vu8 *BinaryImage)//CharacterImageÓÃÓÚ´æ´¢×Ö·û
 		}
 	}	
   *pCharacterImage=0xf0;       //ÊäÈëÊı×é½áÊøÌØÕ÷Öµ
-#ifdef CONFIG_LVGL_USE_MALLOC
-	free((void *)pTmpCharacterSegmentation_x);
-	free((void *)pTmpCharacterSegmentation_y);
-#else
-	lv_free((void *)pTmpCharacterSegmentation_x);
-	lv_free((void *)pTmpCharacterSegmentation_y);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	printf("»ñÈ¡×Ö·ûÏñËØ³É¹¦\r\n");
-  return CharacterImage;
+	
+	UDEBUG("xArrayÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",xArray);
+	free((void *)xArray);
+	UDEBUG("yArrayÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",yArray);
+	free((void *)yArray);
+
+	UDEBUG("»ñÈ¡×Ö·ûÏñËØ³É¹¦\r\n");
 }
 
-static __IO u8 *CharaterNormalized(vu8 *BinaryImage)
+static void CharaterNormalized(vu8 *CharacterMatrix,vu8 *BinaryImage)
 {
 	vu8 modx,leavex,mody,leavey,leavemodx,leavemody,np;
-	vu8 *pSaveCharacterImage=SaveCharacterImage(BinaryImage);
 	vu16 CharacterImageDeltax=0,CharacterImageDeltay=0,i,j;
-#ifdef CONFIG_LVGL_USE_MALLOC
-  vu8 *CharacterMatrix=(vu8 *)malloc(32*CharacterNumToCapture);    //×ÖÄ£Îª16*16£¬¼´32*8Î»£¬×î¶à´æ´¢20¸ö×Ö
-	vu8 *TmpCharacterMatrixImage;//=(vu8 *)malloc(240*320);
-  vu8 *pTmpSaveCharacterImage=pSaveCharacterImage,*pSaveCharacterImageForfree=pSaveCharacterImage,\
-	    *pTmpCharacterMatrixImage=TmpCharacterMatrixImage,*pCharacterMatrix=CharacterMatrix;
-#else
-  vu8 *CharacterMatrix=(vu8 *)lv_malloc(32*CharacterNumToCapture);    //×ÖÄ£Îª16*16£¬¼´32*8Î»£¬×î¶à´æ´¢20¸ö×Ö
-	vu8 *TmpCharacterMatrixImage;//=(vu8 *)lv_malloc(240*320);
-  vu8 *pTmpSaveCharacterImage=pSaveCharacterImage,*pSaveCharacterImageForfree=pSaveCharacterImage,\
-	    *pTmpCharacterMatrixImage=TmpCharacterMatrixImage,*pCharacterMatrix=CharacterMatrix;
-#endif /*CONFIG_LVGL_USE_MALLOC*/	
-	if(CharacterMatrix!=NULL)	printf("CharacterMatrixÄÚ´æ·ÖÅä³É¹¦\r\n");		
- 	else printf("CharacterMatrixÄÚ´æ·ÖÅäÊ§°Ü\r\n");
-	
-	if(TmpCharacterMatrixImage!=NULL)	printf("TmpCharacterMatrixImageÄÚ´æ·ÖÅä³É¹¦\r\n");		
- 	else printf("TmpCharacterMatrixImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	vu8 *pCharacterMatrix=CharacterMatrix;
+  
+	vu8 *TmpCharacterMatrixImage=(vu8 *)malloc(240*320*sizeof(vu8));
+	vu8 *pTmpCharacterMatrixImage=TmpCharacterMatrixImage;
+	if(TmpCharacterMatrixImage!=NULL)	UDEBUG("TmpCharacterMatrixImageÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",TmpCharacterMatrixImage);		
+ 	else UDEBUG("TmpCharacterMatrixImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 
-//	printf("ÄÚ´æÒÑÊ¹ÓÃ: %d\r\n",my_mem_perused(SRAMEX));
-//	my_mem_set((void *)CharacterMatrix,0,32*CharacterNumToCapture);
-//	my_mem_set((void *)TmpCharacterMatrixImage,0,240*320);
+	vu8 *CharacterImage=(vu8 *)malloc(240*320*sizeof(vu8));
+	if(CharacterImage!=NULL)	UDEBUG("CharacterImageÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",CharacterImage);		
+ 	else UDEBUG("CharacterImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	
+	vu8 *pSaveCharacterImage=CharacterImage;
+	vu8 *pTmpSaveCharacterImage=CharacterImage;
+	SaveCharacterImage(pSaveCharacterImage,BinaryImage);
+
+	
 	while(CharacterNumToCapture)
 	{
 	  pTmpSaveCharacterImage=pSaveCharacterImage; //ÁÙÊ±´æ´¢×Ö·ûÏñËØÊı×é×Ö·û¿ªÊ¼Ö¸Õë
@@ -400,7 +361,7 @@ static __IO u8 *CharaterNormalized(vu8 *BinaryImage)
 //			  }				
 //			}		
 //		}
-		//printf("Ë®Æ½¸¯Ê´Íê³É\r\n");
+		//UDEBUG("Ë®Æ½¸¯Ê´Íê³É\r\n");
 		
 		if(*pSaveCharacterImage==0xf0) break;      //ÅĞ¶ÏÊÇ·ñÍê³ÉÈ«²¿µÄ×Ö·û¶ÁÈ¡
 
@@ -463,17 +424,13 @@ static __IO u8 *CharaterNormalized(vu8 *BinaryImage)
 			}
 	  }
 	}
-#ifdef CONFIG_LVGL_USE_MALLOC
 //	free((void *)TmpCharacterMatrixImage);
-	free((void *)pTmpSaveCharacterImage);
-	free((void *)pSaveCharacterImageForfree);
-#else
-//	lv_free((void *)TmpCharacterMatrixImage);
-	lv_free((void *)pTmpSaveCharacterImage);
-	lv_free((void *)pSaveCharacterImageForfree);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	printf("¹éÒ»»¯³É¹¦\r\n");
-	return CharacterMatrix;
+	UDEBUG("TmpCharacterMatrixImageÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",TmpCharacterMatrixImage);
+	free((void *)TmpCharacterMatrixImage);
+	UDEBUG("CharacterImageÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",CharacterImage);
+	free((void *)CharacterImage);
+
+	UDEBUG("¹éÒ»»¯³É¹¦\r\n");
 }
 /*  static vu8 CharacterMatrix[32*CharacterNumToCapture]={0};    //×ÖÄ£Îª16*16£¬¼´32*8Î»£¬×î¶à´æ´¢20¸ö×Ö */
 	
@@ -483,7 +440,6 @@ void CharacterCompareFromExflash(vu8 *BinaryImage,vu16 *Character_GB2312) //´æ´¢
 	vu8 CharacterExflash[32];//Íâ²¿flash¶ÁÊı¾İ»º³åÇø
 	vu8 GridPerByte[32],GridPerByteEx[32]; 
 	vu8 *pCharacterExflash=CharacterExflash,*pGridPerByte=GridPerByte,*pGridPerByteEx=GridPerByteEx;
-  vu8 *pCharacterMatrix=CharaterNormalized(BinaryImage),*pCharacterMatrixTmp=pCharacterMatrix,*pCharacterMatrixForFree=pCharacterMatrix;
   vu16 ConfindeceFlag,encode;	
 	u32 sum,wordAddr,tmpwordAddr,wordToCompareFromExflash=WordCompareFromExflash;
 	wordAddr=(0xb0-0x81)*190; //¶¨Î»±È¶Ô×ÖÄ£Ëù´æ´¢µÄÍâ²¿flashÎ»ÖÃ£¬´Ó0xb0a1£¨°¡£©¿ªÊ¼
@@ -491,24 +447,23 @@ void CharacterCompareFromExflash(vu8 *BinaryImage,vu16 *Character_GB2312) //´æ´¢
 	wordAddr*=32;
 	wordAddr+=FLASH_12CHAR_ADDR;
 	tmpwordAddr=wordAddr;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	vu16 *Confidence=(vu16 *)malloc(CharacterMatchBuf);  //¼ÇÂ¼Íâ²¿flash´Ö±È¶Ô»º³åÇø×ÖÄ£ÖÃĞÅ¶È£¬Æä±êÖ¾ÊıºÍ»º³åÇøÒ»ÖÂ£¬²»ÄÜ´òÂÒ
+
+	vu16 *Confidence=(vu16 *)malloc(CharacterMatchBuf*sizeof(vu16));  //¼ÇÂ¼Íâ²¿flash´Ö±È¶Ô»º³åÇø×ÖÄ£ÖÃĞÅ¶È£¬Æä±êÖ¾ÊıºÍ»º³åÇøÒ»ÖÂ£¬²»ÄÜ´òÂÒ
 	vu16 *TmpCharacter_GB2312=Character_GB2312,*pConfidence=Confidence;
-	u32 *CharacterMatch=(u32 *)malloc(CharacterMatchBuf);;  //´æ´¢´ÓÍâ²¿flash¶ÁÈ¡µÄ´Ö±È¶Ô³É¹¦µÄ×ÖÄ£µØÖ·
+	if(Confidence!=NULL)	UDEBUG("ConfidenceÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",Confidence);		
+ 	else UDEBUG("ConfidenceÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+
+	u32 *CharacterMatch=(u32 *)malloc(CharacterMatchBuf*sizeof(u32));;  //´æ´¢´ÓÍâ²¿flash¶ÁÈ¡µÄ´Ö±È¶Ô³É¹¦µÄ×ÖÄ£µØÖ·
 	u32 *pCharacterMatch=CharacterMatch;
-#else
-	vu16 *Confidence=(vu16 *)lv_malloc(CharacterMatchBuf);  //¼ÇÂ¼Íâ²¿flash´Ö±È¶Ô»º³åÇø×ÖÄ£ÖÃĞÅ¶È£¬Æä±êÖ¾ÊıºÍ»º³åÇøÒ»ÖÂ£¬²»ÄÜ´òÂÒ
-	vu16 *TmpCharacter_GB2312=Character_GB2312,*pConfidence=Confidence;
-	u32 *CharacterMatch=(u32 *)lv_malloc(CharacterMatchBuf);;  //´æ´¢´ÓÍâ²¿flash¶ÁÈ¡µÄ´Ö±È¶Ô³É¹¦µÄ×ÖÄ£µØÖ·
-	u32 *pCharacterMatch=CharacterMatch;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-if(Confidence!=NULL)	printf("ConfidenceÄÚ´æ·ÖÅä³É¹¦\r\n");		
- 	else printf("ConfidenceÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	if(CharacterMatch!=NULL)	UDEBUG("CharacterMatchÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",CharacterMatch);		
+ 	else UDEBUG("CharacterMatchÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 
-	if(CharacterMatch!=NULL)	printf("CharacterMatchÄÚ´æ·ÖÅä³É¹¦\r\n");		
- 	else printf("CharacterMatchÄÚ´æ·ÖÅäÊ§°Ü\r\n");
-
-
+	vu8 *CharacterMatrix=(vu8 *)malloc(32*CharacterNumToCapture*sizeof(vu8));    //×ÖÄ£Îª16*16£¬¼´32*8Î»£¬×î¶à´æ´¢20¸ö×Ö
+	if(CharacterMatrix!=NULL)	UDEBUG("CharacterMatrixÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",CharacterMatrix);		
+ 	else UDEBUG("CharacterMatrixÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	vu8 *pCharacterMatrix=CharacterMatrix,*pCharacterMatrixTmp=pCharacterMatrix;
+	CharaterNormalized(pCharacterMatrix,BinaryImage);
+	
 	for(j=1;j<=CharacterNumToCapture;j++)
 	{
 		pCharacterMatrixTmp=pCharacterMatrix;   //Ö¸Ïò×ÖÄ£Î»Êı×é
@@ -593,14 +548,13 @@ if(Confidence!=NULL)	printf("ConfidenceÄÚ´æ·ÖÅä³É¹¦\r\n");
 		
 		pCharacterMatrix+=32;
 	}
-#ifdef CONFIG_LVGL_USE_MALLOC
-  free((void *)pCharacterMatrixForFree);
+	
+	UDEBUG("CharacterMatrixÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",CharacterMatrix);
+  free((void *)CharacterMatrix);
+	UDEBUG("ConfidenceÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",Confidence);
 	free((void *)Confidence);
+	UDEBUG("CharacterMatchÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",CharacterMatch);
   free((void *)CharacterMatch);
-#else
-  lv_free((void *)pCharacterMatrixForFree);
-	lv_free((void *)Confidence);
-  lv_free((void *)CharacterMatch);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
-	printf("Ê¶±ğÍê³É\r\n");
+
+	UDEBUG("Ê¶±ğÍê³É\r\n");
 }

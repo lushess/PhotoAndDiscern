@@ -12,7 +12,7 @@
 #define OV7670_RRST		PCout(2)  		//读指针复位
 #define OV7670_CS		PCout(3)  		//片选信号(OE)
 
-#define OV7670_DATA   GPIOF->IDR&0x00FF  					//数据输入端口
+#define OV7670_DATA   (GPIOF->IDR&0x00FF)  					//数据输入端口
 /////////////////////////////////////////									
 	    				 
 u8   OV7670_Init(void);		  	   		 

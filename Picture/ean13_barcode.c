@@ -4,12 +4,8 @@
 #include "flash.h"
 #include "usart.h"
 #include "Config/Config.h"
-#ifdef CONFIG_LVGL_USE_MALLOC
-    #include <stdlib.h>
-		#include <string.h>
-#else
-		#include "lvgl/lvgl.h"	 
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+#include <stdlib.h>
+#include <string.h>
 
 void BarcodeAjust(vu8 *BarcodeImage)
 {
@@ -17,11 +13,8 @@ void BarcodeAjust(vu8 *BarcodeImage)
 	vu8 xdst=0,averxdst=0;
 	vu16 i,j;
 	vu32 dstaddup=0;
-#ifdef CONFIG_LVGL_USE_MALLOC
-	__IO int8_t *offset=(int8_t *)malloc(320),*poffset=offset;
-#else
-	__IO int8_t *offset=(int8_t *)lv_malloc(320),*poffset=offset;
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+	volatile int8_t *offset=(int8_t *)malloc(320),*poffset=offset;
+
 	for(j=1;j<=320;j++)
 	{
 		pBarcodeImage=BarcodeImage+240*(j-1); //Ö¸ÏòÃ¿ÐÐÊ×µØÖ·
@@ -61,21 +54,23 @@ void BarcodeAjust(vu8 *BarcodeImage)
 	poffset=offset;
   ImageAjust_Horizontal(pBarcodeImage,poffset);
 
-#ifdef CONFIG_LVGL_USE_MALLOC
 	free((void *)offset);
-#else
-	lv_free((void *)offset);
-#endif /*CONFIG_LVGL_USE_MALLOC*/
+
 }
 
 vu8 BarcodeDenoiseThreshold=10;
 void BarcodeDenoise(vu8 *BarcodeImage) //ÌõÐÎÂë½µÔë´¦Àí£¬Í¨³£ÐèÒªÔÚÇãÐ±Ð£Õýºóµ÷ÓÃÒ»´Î
 {
   vu8 *pBarcodeImage=BarcodeImage;
-  vu16 *pProjective_H=Projective_H(pBarcodeImage),*pProjective_V=Projective_V(pBarcodeImage),\
-	     *pProjective_Htmp=pProjective_H,*pProjective_Vtmp=pProjective_V;
   vu16 i,j;
   
+	vu16 *pProjective_H=(vu16 *)malloc(240*sizeof(vu16));
+	vu16 *pProjective_V=(vu16 *)malloc(320*sizeof(vu16));
+	vu16 *pProjective_Htmp=pProjective_H,*pProjective_Vtmp=pProjective_V;
+	
+	Projective_H(pProjective_Htmp,pBarcodeImage);
+	Projective_V(pProjective_Vtmp,pBarcodeImage);
+	
 	for(j=1;j<=320;j++)
 	{
 		pBarcodeImage=BarcodeImage+(j-1)*240;//Ö¸ÏòÃ¿ÐÐÊ×µØÖ·
@@ -100,13 +95,8 @@ void BarcodeDenoise(vu8 *BarcodeImage) //ÌõÐÎÂë½µÔë´¦Àí£¬Í¨³£ÐèÒªÔÚÇãÐ±Ð£Õýºóµ÷Ó
 		pProjective_Htmp++;
 	}
 
-#ifdef CONFIG_LVGL_USE_MALLOC
   free((void *)pProjective_H);
 	free((void *)pProjective_V);
-#else
-  lv_free((void *)pProjective_H);
-	lv_free((void *)pProjective_V);			 
-#endif /*CONFIG_LVGL_USE_MALLOC*/
 }	
 
 

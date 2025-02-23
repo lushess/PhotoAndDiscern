@@ -27,12 +27,12 @@ extern "C" {
 static u8 calcCharacterBit(vu8 *CharacterMatrix);
 static void calcGridBit(vu8 *CharacterMatrix,vu8 *Grid);
 static u16 FindMaxNumFromArray(vu16 *array,vu16 size);
-static __IO u16 *CalcChangePoint_V(vu8 *BinaryImage); //用于记录纵向跳变点，共240个数据，ChangePointArray_V[x]其中x为图片横坐标
-static __IO u16 *CalcChangePoint_H(vu8 *BinaryImage); //用于记录横向跳变点，共320个数据，ChangePointArray_H[y]其中y为图片纵坐标
-static __IO u16 *CharacterSegmentation_x(vu8 *BinaryImage);//x数组每两个元素分别表示xleft,xright
-static __IO u16 *CharacterSegmentation_y(vu8 *BinaryImage);//y数组每两个元素分别表示yup,ylow
-static __IO u8 *SaveCharacterImage(vu8 *BinaryImage);//CharacterImage用于存储字符像素，其中用0x0f隔开
-static __IO u8 *CharaterNormalized(vu8 *BinaryImage);//字符归一化，同时像素由8位转为1位表示
+static void CalcChangePoint_V(vu16 *ChangePointArray_V,vu8 *BinaryImage); //用于记录纵向跳变点，共240个数据，ChangePointArray_V[x]其中x为图片横坐标
+static void CalcChangePoint_H(vu16 *ChangePointArray_H,vu8 *BinaryImage); //用于记录横向跳变点，共320个数据，ChangePointArray_H[y]其中y为图片纵坐标
+static void CharacterSegmentation_x(vu16 *xArray,vu8 *BinaryImage);//x数组每两个元素分别表示xleft,xright
+static void CharacterSegmentation_y(vu16 *yArray,vu8 *BinaryImage);//y数组每两个元素分别表示yup,ylow
+static void SaveCharacterImage(vu8 *CharacterImage,vu8 *BinaryImage);//CharacterImage用于存储字符像素，其中用0x0f隔开
+static void CharaterNormalized(vu8 *CharacterMatrix,vu8 *BinaryImage);//字符归一化，同时像素由8位转为1位表示
 
 /*****      外部调用       *****/
 void CharacterCompareFromExflash(vu8 *BinaryImage,vu16 *Character_GB2312); //从外部FLASH读取(16*16)字模进行比对，存储字符编码到Character_GB2312数组

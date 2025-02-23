@@ -27,41 +27,44 @@
    Application configuration
  *=========================*/
 
-#define CONFIG_SYSTEM_SAVE_FILE_PATH          "/SystemSave.json"
-#define CONFIG_SYSTEM_SAVE_FILE_BACKUP_PATH   "/.SystemSaveBackup.json"
-#define CONFIG_SYSTEM_LANGUAGE_DEFAULT        "cn-GB"
+//#define CONFIG_SYSTEM_SAVE_FILE_PATH          "/SystemSave.json"
+//#define CONFIG_SYSTEM_SAVE_FILE_BACKUP_PATH   "/.SystemSaveBackup.json"
+//#define CONFIG_SYSTEM_LANGUAGE_DEFAULT        "cn-GB"
 
 
 #define __EXRAM    __attribute__((section("EXRAM")))     
 #define __INRAM    __attribute__((section("INRAM"))) 
 
-//#define __ALIGN(x) __attribute__((align(x)))
+#define __ALIGN(x) __attribute__((align(x)))
 
 
-#define CONFIG_LVGL_USE_SRAMEX_ENABLE    1
-#if CONFIG_LVGL_USE_SRAMEX_ENABLE
-#define CONFIG_LVGL_USE_SRAMEX
-#endif //CONFIG_LVGL_USE_SRAMEX_ENABLE
 
-#define CONFIG_LVGL_USE_MALLOC_ENABLE  1  //同时影响其他使用SRAMEX的任务
-#if CONFIG_LVGL_USE_MALLOC_ENABLE
-#define CONFIG_LVGL_USE_MALLOC
-#endif //CONFIG_LVGL_USE_MALLOC_ENABLE
+//#define CONFIG_LVGL_USE_SRAMEX_ENABLE    1
+//		#if CONFIG_LVGL_USE_SRAMEX_ENABLE
+//		#define CONFIG_LVGL_USE_SRAMEX
+//#endif //CONFIG_LVGL_USE_SRAMEX_ENABLE
+
+//#define CONFIG_LVGL_USE_MALLOC_ENABLE 	 1  //同时影响其他使用SRAMEX的任务
+//		#if CONFIG_LVGL_USE_MALLOC_ENABLE
+//		#define CONFIG_LVGL_USE_MALLOC
+//#endif //CONFIG_LVGL_USE_MALLOC_ENABLE
 
 
-#define USART_OUTPUT_DEBUG_ENABLE 1
-#if USART_OUTPUT_DEBUG_ENABLE
-#define USART_OUTPUT_DEBUG
+#define USART_OUTPUT_DEBUG_ENABLE 		1
+		#if USART_OUTPUT_DEBUG_ENABLE
+				#define DEBUG_USART_USE_DMA_ENABLE    0
+				#if DEBUG_USART_USE_DMA_ENABLE
+						#define DEBUG_USART_USE_DMA
+				#endif //DEBUG_USART_USE_DMA_ENABLE
+		#define USART_OUTPUT_DEBUG
 #endif //USART_OUTPUT_DEBUG_ENABLE
 
-#define FREERTOS_HEAP_SIZE 	((size_t)(0x00005000))
 
-/* 内存使用记录 */
-/* EXRAM */
+/* 内存记录 */
 #define EXRAM_TOTAL         			((size_t)(0x00200000))
-#define EXRAM_HEAP_SECTION 				((size_t)(0x001F0000))
-//#define EXRAM_LVGL_BUFF           ((size_t)((240*400/10))
-//#define EXRAM_LEAVE   						(EXRAM_TOTAL - EXRAM_HEAP_SECTION - EXRAM_FREERTOS_HEAP_SIZE - EXRAM_LVGL_BUFF)
+#define INRAM_TOTAL               ((size_t)(0x00010000))
 
+/* FREERTOS */
+#define FREERTOS_HEAP_SIZE 	((size_t)(0x00005000))
 
 #endif //__CONFIG_H
