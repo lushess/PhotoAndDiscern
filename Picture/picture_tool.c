@@ -7,6 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef USE_FREERTOS_MALLOCATOR
+#include "freeRTOS.h"
+#endif //USE_FREERTOS_MALLOCATOR
+
 bmpinfo_t bmpinfo __INRAM = {NULL};
 
 
@@ -93,7 +97,7 @@ void CapLCDToBinary_ByRG565_HSV745IsTmp(vu8 *BinaryImage)//Î´ÊµÏÖ
 	int8_t h=0;
 	vu8 *TmpBinaryImage=BinaryImage;
 	vu16 Imagetmp,i,j;
-//	vu16 *hsv=(vu16 *)malloc(240*320*sizeof(vu16));
+//	vu16 *hsv=(vu16 *)Memalloc(240*320*sizeof(vu16));
 //	vu16 *phsv=hsv;
 	LCD_Display_Dir(0);
   LCD_Set_Window(0,0,240-1,320-1);
@@ -170,7 +174,7 @@ void OptionalFilter(vu8 *Image) //×ÔÊÊÓ¦Ñ¡ÔñĞÔÆ½»¬ÂË²¨£¬ÆäÄÚÓĞ9¸öËã×Ó£¬ÄÜÓĞĞ§±£Á
 	vu16 i,j;
 	vu32 variance[9]={0},Minvariance=0xffffffff;//variance´æ´¢Æä¶ÔÓ¦µÄÄ£°åÏñËØ·½²îºÍ
 	
-  vu8 *TmpImage=(vu8 *)malloc(240*320*sizeof(vu8)),*pTmpImage=TmpImage;
+  vu8 *TmpImage=(vu8 *)Memalloc(240*320*sizeof(vu8)),*pTmpImage=TmpImage;
 	if(TmpImage!=NULL)	UDEBUG("TmpImageÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",TmpImage);		
  	else UDEBUG("TmpImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 	memset((void *)pTmpImage,255,240*320*sizeof(vu8));
@@ -365,7 +369,7 @@ void OptionalFilter(vu8 *Image) //×ÔÊÊÓ¦Ñ¡ÔñĞÔÆ½»¬ÂË²¨£¬ÆäÄÚÓĞ9¸öËã×Ó£¬ÄÜÓĞĞ§±£Á
 	}
 	
 	UDEBUG("TmpImageÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",TmpImage);
-  free((void *)TmpImage);
+  Memfree((void *)TmpImage);
 
 }
 
@@ -375,7 +379,7 @@ void MedianFilter(vu8 *Image)
 	vu8 rank[9]={0};
 	vu16 i,j;
 	
-  vu8 *TmpImage=(vu8 *)malloc(240*320*sizeof(vu8));
+  vu8 *TmpImage=(vu8 *)Memalloc(240*320*sizeof(vu8));
 	if(TmpImage!=NULL)	UDEBUG("TmpImageÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",TmpImage);		
  	else UDEBUG("TmpImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 	vu8 *pTmpImage=TmpImage,*pImage=Image;
@@ -437,7 +441,7 @@ void MedianFilter(vu8 *Image)
 	}	
 	
 	UDEBUG("TmpImageÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",TmpImage);
-  free((void *)TmpImage);
+  Memfree((void *)TmpImage);
 
 	UDEBUG("ÖĞÖµÂË²¨³É¹¦£¡\r\n");
 }
@@ -448,7 +452,6 @@ static void GrayGradient_Diffrential(vu8 *Gradient,vu8 *GrayImage,u8 GradientThr
 	vu8 tmpGradientx,tmpGradienty;
 	vu16 i,j;
 	vu8 *pGradient=Gradient;
-	//vu8 *Gradient=(vu8 *)malloc(240*320*sizeof(vu8)),*pGradient=Gradient;
 	
 	for(j=1;j<=320-1;j++)
 	{
@@ -476,7 +479,6 @@ static void GrayGradient_Roberts(vu8 *Gradient,vu8 *GrayImage,u8 GradientThresho
   vu8 *pGrayImage=GrayImage,*pGradient=Gradient;
 	vu8 tmpGradientfirst,tmpGradientysecond;
 	vu16 i,j;
-	//vu8 *Gradient=(vu8 *)malloc(240*320*sizeof(vu8)),*pGradient=Gradient;
 
 	for(j=1;j<=320-1;j++)
 	{
@@ -507,7 +509,6 @@ static void GrayGradient_Sobel(vu8 *Gradient,vu8 *GrayImage,u8 GradientThreshold
 	vu8 *pGrayImage=GrayImage,*pGradient=Gradient;
 	vu16 i,j;
 	volatile int16_t tmpGradientH,tmpGradientyV;
-	//vu8 *Gradient=(vu8 *)malloc(240*320*sizeof(vu8));
 
 	pGrayImage=GrayImage+240;pGradient=Gradient+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
 	for(j=2;j<=320-1;j++)
@@ -578,7 +579,7 @@ void BinaryToEdge(vu8 *BinaryImage) //ÌÍ¿ÕÄÚ²¿µã·¨È¡µÃÇ°¾°±ßÑØ
   vu8 *pBinaryImage=BinaryImage;
 	vu8 rank[8]={0},ranknum;
   vu16 i,j;
-	vu8 *Edge=(vu8 *)malloc(240*320*sizeof(vu8)),*pEdge=Edge;
+	vu8 *Edge=(vu8 *)Memalloc(240*320*sizeof(vu8)),*pEdge=Edge;
 
 	pBinaryImage=BinaryImage+240;pEdge=Edge+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
   for(j=2;j<=320-1;j++)
@@ -633,7 +634,7 @@ void BinaryToEdge(vu8 *BinaryImage) //ÌÍ¿ÕÄÚ²¿µã·¨È¡µÃÇ°¾°±ßÑØ
 		}	
 	}
 	
-	free((void *)Edge);
+	Memfree((void *)Edge);
 }
 
 void ObjectMeasure_FromBinary(vu8 *ObjectFlag,vu8 *BinaryImage,vu32 *ObjectSize)//±ê¼Ç¸÷¸öÎïÌå£¬²¢·µ»Ø£¬±ê¼ÇÖµ´Ó1¿ªÊ¼£¬ObjectSizeÊı×é¼ÇÂ¼Ã¿¸ö±ê¼ÇÎïÌåÕ¼ÓÃÏñËØ´óĞ¡
@@ -641,7 +642,6 @@ void ObjectMeasure_FromBinary(vu8 *ObjectFlag,vu8 *BinaryImage,vu32 *ObjectSize)
   vu8 *pObjectFlag=ObjectFlag,*pBinaryImage=BinaryImage;
 	vu8 ObjectFillFlag=0;
 	vu16 i,j;
-	//vu8 *ObjectFlag=(vu8 *)malloc(240*320*sizeof(vu8)),*pObjectFlag=ObjectFlag;
 
 	vu32 *pObjectSize=ObjectSize;
 	
@@ -682,7 +682,7 @@ static void Corrode(vu8 *Image)
   vu8 ranknum,tmpimage;
 	vu8 rank[5]={0};
 	vu16 i,j;
-	vu8 *TmpImage=(vu8 *)malloc(240*320*sizeof(vu8));
+	vu8 *TmpImage=(vu8 *)Memalloc(240*320*sizeof(vu8));
 	vu8 *pTmpImage=TmpImage,*pImage=Image;
 
 	pTmpImage=TmpImage+240;pImage=Image+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
@@ -752,7 +752,7 @@ static void Corrode(vu8 *Image)
 		}
 	}	
 	
-	free((void *)TmpImage);
+	Memfree((void *)TmpImage);
 
 }
 
@@ -761,7 +761,7 @@ static void Expand(vu8 *Image)
   vu8 ranknum,tmpimage;
 	vu8 rank[5]={0};
 	vu16 i,j;
-	vu8 *TmpImage=(vu8 *)malloc(240*320*sizeof(vu8));
+	vu8 *TmpImage=(vu8 *)Memalloc(240*320*sizeof(vu8));
 	vu8 *pTmpImage=TmpImage,*pImage=Image;
 
 	pTmpImage=TmpImage+240;pImage=Image+240; //Ö¸ÏòÏñËØÊı×éµÚ¶şĞĞ
@@ -831,7 +831,7 @@ static void Expand(vu8 *Image)
 		}
 	}	
 	
-	free((void *)TmpImage);
+	Memfree((void *)TmpImage);
 
 }
 
@@ -901,7 +901,7 @@ static void CalcGrayHist_Chance(volatile float *histchance,vu8 *GrayImage) //¼ÆË
 	vu8 *pGrayImage=GrayImage;
 	vu16 i,j;
 	volatile float *phistchance=histchance;
-  vu32 *hist=(vu32 *)malloc(256*sizeof(vu32)),*phist=hist;
+  vu32 *hist=(vu32 *)Memalloc(256*sizeof(vu32)),*phist=hist;
 
 	for(j=1;j<=320;j++)
 	{
@@ -918,7 +918,7 @@ static void CalcGrayHist_Chance(volatile float *histchance,vu8 *GrayImage) //¼ÆË
 		phist++;
 	}
 
-	free((void *)hist);
+	Memfree((void *)hist);
 }
 
 static void GrayImageMapping_ByChanceHist(vu8 *mapping,vu8 *GrayImage)
@@ -926,8 +926,8 @@ static void GrayImageMapping_ByChanceHist(vu8 *mapping,vu8 *GrayImage)
 	vu16 i,j;
   vu8 *pGrayImage=GrayImage,*pmapping=mapping;
   
-	volatile float *addupchance=(float *)malloc(256*sizeof(float)),*paddupchance=addupchance;
-	volatile float *histchance=(float *)malloc(256*sizeof(float)),*pChanceTmp=histchance;
+	volatile float *addupchance=(float *)Memalloc(256*sizeof(float)),*paddupchance=addupchance;
+	volatile float *histchance=(float *)Memalloc(256*sizeof(float)),*pChanceTmp=histchance;
 	CalcGrayHist_Chance(histchance,pGrayImage);
 		
 	
@@ -943,8 +943,8 @@ static void GrayImageMapping_ByChanceHist(vu8 *mapping,vu8 *GrayImage)
 		pChanceTmp++;
 	}	
 	
-  free((void *)histchance);
-  free((void *)addupchance);
+  Memfree((void *)histchance);
+  Memfree((void *)addupchance);
 }
 
 void GrayEven(vu8 *GrayImage)  //»Ò¶ÈÍ¼¾ùÔÈ»¯
@@ -953,7 +953,7 @@ void GrayEven(vu8 *GrayImage)  //»Ò¶ÈÍ¼¾ùÔÈ»¯
 	vu8 *pGrayImage=GrayImage;
 	vu16 i,j;
 	
-	vu8 *mapping=(vu8 *)malloc(256*sizeof(vu8)),*pmapping=mapping;
+	vu8 *mapping=(vu8 *)Memalloc(256*sizeof(vu8)),*pmapping=mapping;
 	GrayImageMapping_ByChanceHist(mapping,pGrayImage);
 
 	
@@ -967,14 +967,13 @@ void GrayEven(vu8 *GrayImage)  //»Ò¶ÈÍ¼¾ùÔÈ»¯
 		}		
 	}
 	
-  free((void *)mapping);
+  Memfree((void *)mapping);
 
 }
 
 void GrayChange_Linear(vu8 *GrayImage,float modulus,int8_t trans) //ÏßĞÔ¸Ä±ä»Ò¶ÈÖµ
 {
   vu8 *pGrayImage=GrayImage;
-//  vu8 *TmpGrayImage=(vu8 *)malloc(SRAMEX,240*320*sizeof(vu8)),*pTmpGrayImage=TmpGrayImage;
   vu16 i,j;
 	float tempimage;
 	
@@ -997,7 +996,7 @@ static vu8 CalcThresold_SimpleTwoPeak_ByGrayHist(vu8 *GrayImage)
 	vu8 *pGrayImage=GrayImage;
 	vu16 i,j,itmp,jtmp;
 	vu32 histMax=0,histSecond=0;
-  vu32 *hist=(vu32 *)malloc(256*sizeof(vu32));
+  vu32 *hist=(vu32 *)Memalloc(256*sizeof(vu32));
 
 	for(j=1;j<=320;j++)
 	{
@@ -1053,7 +1052,7 @@ static vu8 CalcThresold_SimpleTwoPeak_ByGrayHist(vu8 *GrayImage)
   if(jfindpeak!=0&&jtmp!=0)GrayForbinary=(vu8)jtmp;
 	else if(ifindpeak!=0&&itmp!=256)GrayForbinary=(vu8)itmp;
 	
-	free((void *)hist);
+	Memfree((void *)hist);
 
 	UDEBUG("µÃµ½»Ò¶ÈÍ¼ãĞÖµ£¡\r\n");
   return GrayForbinary; //·µ»ØÖµ×÷Îª¶şÖµ»¯µÄãĞÖµ

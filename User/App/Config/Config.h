@@ -38,7 +38,7 @@
 #define __ALIGN(x) __attribute__((align(x)))
 
 
-
+#define LV_COLOR_DEPTH	 16
 //#define CONFIG_LVGL_USE_SRAMEX_ENABLE    1
 //		#if CONFIG_LVGL_USE_SRAMEX_ENABLE
 //		#define CONFIG_LVGL_USE_SRAMEX
@@ -49,22 +49,27 @@
 //		#define CONFIG_LVGL_USE_MALLOC
 //#endif //CONFIG_LVGL_USE_MALLOC_ENABLE
 
+#define USE_FREERTOS_MALLOCATOR_ENABLE		1   // 如果DISABLE，需把分配给FREERTOS的EXRAM堆空间分配到系统HEAP节区
+		#if USE_FREERTOS_MALLOCATOR_ENABLE
+				#define USE_FREERTOS_MALLOCATOR
+		#endif //USE_FREERTOS_MALLOCATOR_ENABLE
 
 #define USART_OUTPUT_DEBUG_ENABLE 		1
 		#if USART_OUTPUT_DEBUG_ENABLE
+				#define USART_OUTPUT_DEBUG
 				#define DEBUG_USART_USE_DMA_ENABLE    0
-				#if DEBUG_USART_USE_DMA_ENABLE
-						#define DEBUG_USART_USE_DMA
-				#endif //DEBUG_USART_USE_DMA_ENABLE
-		#define USART_OUTPUT_DEBUG
-#endif //USART_OUTPUT_DEBUG_ENABLE
-
+						#if DEBUG_USART_USE_DMA_ENABLE
+								#define DEBUG_USART_USE_DMA
+						#endif //DEBUG_USART_USE_DMA_ENABLE
+		#endif //USART_OUTPUT_DEBUG_ENABLE
 
 /* 内存记录 */
 #define EXRAM_TOTAL         			((size_t)(0x00200000))
 #define INRAM_TOTAL               ((size_t)(0x00010000))
 
 /* FREERTOS */
-#define FREERTOS_HEAP_SIZE 	((size_t)(0x00005000))
+#define FREERTOS_HEAP_SIZE_INRAM 	((size_t)(0x00006000))
+#define FREERTOS_HEAP_SIZE_EXRAM 	((size_t)(0x0003FA00))
+
 
 #endif //__CONFIG_H

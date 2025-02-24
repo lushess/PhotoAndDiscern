@@ -6,6 +6,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "event_groups.h"
+#include <stdbool.h>
 
 
 #define KEY_LEFT_Pin    GPIO_Pin_2    //∂®“ÂK_LEFTπ‹Ω≈

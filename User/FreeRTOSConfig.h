@@ -71,8 +71,7 @@
 #define FREERTOS_CONFIG_H
 
 #include "stm32f10x.h"
-#include "usart.h"
-#include "lvgl/lvgl.h"
+#include "Config/Config.h"
 
 //针对不同的编译器调用不同的stdint.h文件
 #if defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__)
@@ -84,13 +83,39 @@
 //    #define SIZE_MAX    ( ( size_t ) -1 )
 //#endif
 
+//内存分配器
+#ifdef USE_FREERTOS_MALLOCATOR
+		#define Memalloc pvPortMalloc
+		#define Memfree vPortFree
+#else
+		#define Memalloc malloc
+		#define Memfree free
+#endif //USE_FREERTOS_MALLOCATOR
+
 //断言
 #define vAssertCalled(char,int) //printf("Error:%s,%d\r\n",char,int)
 #define configASSERT(x) \
 do{\
  if((x)==0) vAssertCalled(__FILE__,__LINE__);\
-}while(0)	
+}while(0)
 
+//串口DEBUG输出当前内存信息
+#ifdef USART_OUTPUT_DEBUG
+#include "usart.h"
+#define MemInfo_UDEBUG()		do{\
+																HeapStats_t xStats;\
+																vPortGetHeapStats(&xStats);\
+																UDEBUG("内存总空间:%d字节",xStats.xAvailableHeapSpaceInBytes);\
+																UDEBUG("最大可用的空闲块:%d字节",xStats.xSizeOfLargestFreeBlockInBytes);\
+																UDEBUG("最小可用的空闲块:%d字节",xStats.xSizeOfSmallestFreeBlockInBytes);\
+																UDEBUG("可用的空闲块:%d块",xStats.xNumberOfFreeBlocks);\
+																UDEBUG("运行以来最小可用内存:%d字节",xStats.xMinimumEverFreeBytesRemaining);\
+																UDEBUG("成功分配的块:%d块",xStats.xNumberOfSuccessfulAllocations);\
+																UDEBUG("成功分配的块:%d块",xStats.xNumberOfSuccessfulFrees);\
+															}while(0)
+#else
+#define	MemInfo_UDEBUG()
+#endif //USART_OUTPUT_DEBUG
 /************************************************************************
  *               FreeRTOS基础配置配置选项 
  *********************************************************************/
@@ -191,7 +216,7 @@ do{\
 //支持静态内存
 #define configSUPPORT_STATIC_ALLOCATION					0					
 //系统所有总的堆大小
-#define configTOTAL_HEAP_SIZE			FREERTOS_HEAP_SIZE 
+//#define configTOTAL_HEAP_SIZE			FREERTOS_HEAP_SIZE 
 
 /***************************************************************
              FreeRTOS与钩子函数有关的配置选项                                            

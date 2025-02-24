@@ -7,6 +7,7 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "user_task.h"
 
 
 /*******************************************************************************
@@ -200,10 +201,12 @@ void EXTI_ITConfig(uint32_t EXTI_Line,FunctionalState NewState)
 
 volatile u8 ov_sta=0;	//帧中断标记
 extern SemaphoreHandle_t ov_vsync_Handle;
+extern TaskHandle_t camera_refresh_Handle;
 
  //外部中断5~9服务程序
 void EXTI9_5_IRQHandler(void)
 {	
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	if(EXTI_GetITStatus(EXTI_Line7)==SET)	//是7线的中断
 	{ 
 		if(0 == ov_sta)
@@ -213,8 +216,13 @@ void EXTI9_5_IRQHandler(void)
 			OV7670_WREN=1;	//允许写入FIFO 	 
 			ov_sta = 0xff;		//帧中断标记 
 		}
+		else if(0xff == ov_sta)
+		{			
+			xTaskNotifyFromISR((TaskHandle_t	)camera_refresh_Handle,(uint32_t	)REFRESH_EVENT,(eNotifyAction)eSetBits,&xHigherPriorityTaskWoken);
+		}
 	}
 	EXTI_ClearITPendingBit(EXTI_Line7);  //清除EXTI7线路挂起位
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 	
 } 
 //外部中断7初始化

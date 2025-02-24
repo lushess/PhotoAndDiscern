@@ -40,7 +40,7 @@ void camera_refresh(void)
 	u32 j;
 	u16 i;
  	u16 color;
-	u32 current_event=0,last_event=0;
+	u32 current_event=0,last_event=ENREFRESH_EVENT;
 
   BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
 	while(1)
@@ -49,21 +49,22 @@ void camera_refresh(void)
                             0xffffffffUL,	   //退出函数的时候清除所有bit
                             &current_event,		  //保存任务通知值                    
                             portMAX_DELAY);	//阻塞时间
+		//vTaskDelay(500);
 		if( pdTRUE == xReturn )
 		{ 
 				last_event|=current_event;
-				if(current_event==DISREFRESH_EVENT) 
+				if(current_event&DISREFRESH_EVENT) 
 				{
 					last_event=0;
 					ov_sta=0;
 					EXTI_ITConfig(EXTI_Line7,DISABLE);
 				}
-				else if(current_event==ENREFRESH_EVENT&&ov_sta==0)
+				else if(current_event&ENREFRESH_EVENT&&ov_sta==0)
 				{
 				  EXTI_ITConfig(EXTI_Line7,ENABLE);
 				}
 				
-				if(last_event==(ENREFRESH_EVENT|REFRESH_EVENT)&&ov_sta!=0)
+				if(last_event&(ENREFRESH_EVENT|REFRESH_EVENT)&&ov_sta!=0)
 				{
 						last_event&=~REFRESH_EVENT;
 					
@@ -136,7 +137,7 @@ void photo(void)
 		LCD_Display_Dir(0);
     LCD_Set_Window(0,0,240-1,320-1);		
 
-    path = (char *)malloc(sizeof(FIL));
+    path = (char *)Memalloc(sizeof(FIL));
 		
 		sprintf(path,"%s%s%d",SDCARD_PHOTO_PATH_DEFAULT,"/",photocount);
 		if(f_open(file,path,FA_CREATE_ALWAYS|FA_WRITE) == FR_OK)
@@ -154,9 +155,10 @@ void photo(void)
 			} 
 		}
 		
-    free((void *)path);
+    Memfree((void *)path);
 
 		f_write(file,&bmpinfo,sizeof(bmpinfo_t),&bw);
+		if(bw) UDEBUG("向文件写入BMP头文件信息,内容共%d字节",bw);
 
 		for(j=1;j<=320;j++)
 		{
@@ -238,8 +240,12 @@ void discern(void)//识别
 				GPIOF_Pin0_5_BeUsedFor_SRAMEX();
 
 		    //vu8 MedianfilterCout;
-				vu8 *image=(vu8 *)malloc(76800*sizeof(vu8)),*Tmpimage=image;			
-				vu16 *character=(vu16 *)malloc(CharacterNumToCapture),*Tmpcharacter=character;
+				vu8 *image=(vu8 *)Memalloc(76800*sizeof(vu8)),*Tmpimage=image;
+				if(image!=NULL)	UDEBUG("image内存分配成功,其地址为:%p\r\n",image);		
+				else UDEBUG("image内存分配失败\r\n");			
+				vu16 *character=(vu16 *)Memalloc(CharacterNumToCapture),*Tmpcharacter=character;
+				if(character!=NULL)	UDEBUG("character内存分配成功,其地址为:%p\r\n",character);		
+				else UDEBUG("character内存分配失败\r\n");
 
 			
 			  /* 显示UI */			  
@@ -301,8 +307,12 @@ void discern(void)//识别
 				
 				}				
 				
-				free((void *)image);
-		    free((void *)character);			
+				UDEBUG("image内存已释放,其地址为:%p\r\n",image);
+				Memfree((void *)image);
+				UDEBUG("character内存已释放,其地址为:%p\r\n",character);
+		    Memfree((void *)character);			
+				
+				MemInfo_UDEBUG(); //输出内存信息
 				
         //GPIOF_Pin0_5_BeUsedFor_OV7670();//由于SRAMEX和OV7670的FIFO有部分GPIO共用，设置GPIOF，Pin0_5用于FIFO
 				xTaskNotify((TaskHandle_t	)camera_refresh_Handle,

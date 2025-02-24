@@ -7,13 +7,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef USE_FREERTOS_MALLOCATOR
+#include "freeRTOS.h"
+#endif //USE_FREERTOS_MALLOCATOR
+
 void BarcodeAjust(vu8 *BarcodeImage)
 {
   vu8 *pBarcodeImage=BarcodeImage;
 	vu8 xdst=0,averxdst=0;
 	vu16 i,j;
 	vu32 dstaddup=0;
-	volatile int8_t *offset=(int8_t *)malloc(320),*poffset=offset;
+	volatile int8_t *offset=(int8_t *)Memalloc(320),*poffset=offset;
 
 	for(j=1;j<=320;j++)
 	{
@@ -54,7 +58,7 @@ void BarcodeAjust(vu8 *BarcodeImage)
 	poffset=offset;
   ImageAjust_Horizontal(pBarcodeImage,poffset);
 
-	free((void *)offset);
+	Memfree((void *)offset);
 
 }
 
@@ -64,8 +68,8 @@ void BarcodeDenoise(vu8 *BarcodeImage) //ÌõÐÎÂë½µÔë´¦Àí£¬Í¨³£ÐèÒªÔÚÇãÐ±Ð£Õýºóµ÷Ó
   vu8 *pBarcodeImage=BarcodeImage;
   vu16 i,j;
   
-	vu16 *pProjective_H=(vu16 *)malloc(240*sizeof(vu16));
-	vu16 *pProjective_V=(vu16 *)malloc(320*sizeof(vu16));
+	vu16 *pProjective_H=(vu16 *)Memalloc(240*sizeof(vu16));
+	vu16 *pProjective_V=(vu16 *)Memalloc(320*sizeof(vu16));
 	vu16 *pProjective_Htmp=pProjective_H,*pProjective_Vtmp=pProjective_V;
 	
 	Projective_H(pProjective_Htmp,pBarcodeImage);
@@ -95,8 +99,8 @@ void BarcodeDenoise(vu8 *BarcodeImage) //ÌõÐÎÂë½µÔë´¦Àí£¬Í¨³£ÐèÒªÔÚÇãÐ±Ð£Õýºóµ÷Ó
 		pProjective_Htmp++;
 	}
 
-  free((void *)pProjective_H);
-	free((void *)pProjective_V);
+  Memfree((void *)pProjective_H);
+	Memfree((void *)pProjective_V);
 }	
 
 

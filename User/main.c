@@ -140,7 +140,7 @@ static void AppTaskCreate(void)
 	//初始化PA7中断，即OV7670的帧中断
 	EXTI7_Init();
 	ov_sta = 0;
-	EXTI_ITConfig(EXTI_Line7,DISABLE);
+	EXTI_ITConfig(EXTI_Line7,ENABLE);
 	
 	key_EXTI_Init(); //按键中断初始化
 	
@@ -239,6 +239,7 @@ int main()
 	LCD_ShowFont12Char(10, 30, "www.prechin.net");    
 	LCD_ShowFont12Char(10, 50, "摄像头应用--OV7670");
 	
+	GPIOF_Pin0_5_BeUsedFor_OV7670();
 	delay_ms(1000);
 	i=OV7670_Init();
 	if (0 == i){
@@ -264,6 +265,12 @@ int main()
 	
 	GPIOF_Pin0_5_BeUsedFor_SRAMEX();
 	
+	//初始化freeRTOS内存
+	extern HeapRegion_t xHeapRegions[];
+	vPortDefineHeapRegions( xHeapRegions );
+		
+	MemInfo_UDEBUG(); //输出内存信息
+		
 	xReturn = xTaskCreate((TaskFunction_t )AppTaskCreate,  /* 任务入口函数 */
                         (const char*    )"AppTaskCreate",/* 任务名字 */
                         (uint16_t       )512,  /* 任务栈大小 */

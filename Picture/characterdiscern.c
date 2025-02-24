@@ -7,6 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef USE_FREERTOS_MALLOCATOR
+#include "freeRTOS.h"
+#endif //USE_FREERTOS_MALLOCATOR
+
 static u8 calcCharacterBit(vu8 *CharacterMatrix)
 {
 	vu8 sum=0,tim=32;
@@ -131,7 +135,7 @@ static void CharacterSegmentation_x(vu16 *xArray,vu8 *BinaryImage)//xÊı×éÃ¿Á½¸öÔ
   vu16 j;
 	vu16 *pxArray=xArray;
 	
-	vu16 *ChangePointArray_V=(vu16 *)malloc(240*sizeof(vu16));
+	vu16 *ChangePointArray_V=(vu16 *)Memalloc(240*sizeof(vu16));
 	if(ChangePointArray_V!=NULL)	UDEBUG("ChangePointArray_VÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_V);		
  	else UDEBUG("ChangePointArray_VÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 	
@@ -155,7 +159,7 @@ static void CharacterSegmentation_x(vu16 *xArray,vu8 *BinaryImage)//xÊı×éÃ¿Á½¸öÔ
 	*pxArray=0;  //×÷Îª¾²Ì¬Êı×éxArrayÌØÕ÷µã,µü´úÊ±ÅĞ¶ÏÒÔ×÷Í£Ö¹
 	
 	UDEBUG("ChangePointArray_VÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_V);
-	free((void *)ChangePointArray_V);
+	Memfree((void *)ChangePointArray_V);
 	
 }
 static void CharacterSegmentation_y(vu16 *yArray,vu8 *BinaryImage)//yÊı×éÃ¿Á½¸öÔªËØ·Ö±ğ±íÊ¾yup,ylow
@@ -164,7 +168,7 @@ static void CharacterSegmentation_y(vu16 *yArray,vu8 *BinaryImage)//yÊı×éÃ¿Á½¸öÔ
   vu16 i;
 	vu16 *pyArray=yArray;
 	
-	vu16 *ChangePointArray_H=(vu16 *)malloc(320*sizeof(vu16));
+	vu16 *ChangePointArray_H=(vu16 *)Memalloc(320*sizeof(vu16));
 	if(ChangePointArray_H!=NULL)	UDEBUG("ChangePointArray_VÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_H);		
  	else UDEBUG("ChangePointArray_HÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 	
@@ -188,7 +192,7 @@ static void CharacterSegmentation_y(vu16 *yArray,vu8 *BinaryImage)//yÊı×éÃ¿Á½¸öÔ
 	*pyArray=0;
 	
 	UDEBUG("ChangePointArray_HÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_H);
-	free((void *)ChangePointArray_H);
+	Memfree((void *)ChangePointArray_H);
 
 }
 
@@ -201,14 +205,14 @@ static void SaveCharacterImage(vu8 *CharacterImage,vu8 *BinaryImage)//CharacterI
 	vu16 xleft,xright,yup,ylow,deltax,deltay,i,j,tmpxleft,tmpdeltax;
 	u32 shifty,shiftx;
 	
-	vu16 *xArray=(vu16 *)malloc(240*sizeof(vu16));
+	vu16 *xArray=(vu16 *)Memalloc(240*sizeof(vu16));
 	if(xArray!=NULL)	UDEBUG("xArrayÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",xArray);		
  	else UDEBUG("xArrayÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 	
 	vu16 *pCharacterSegmentation_x=xArray; 
 	CharacterSegmentation_x(pCharacterSegmentation_x,TmpBinaryImage);
 	
-	vu16 *yArray=(vu16 *)malloc(320*sizeof(vu16));
+	vu16 *yArray=(vu16 *)Memalloc(320*sizeof(vu16));
 	if(yArray!=NULL)	UDEBUG("yArrayÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",yArray);		
  	else UDEBUG("yArrayÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 	
@@ -273,9 +277,9 @@ static void SaveCharacterImage(vu8 *CharacterImage,vu8 *BinaryImage)//CharacterI
   *pCharacterImage=0xf0;       //ÊäÈëÊı×é½áÊøÌØÕ÷Öµ
 	
 	UDEBUG("xArrayÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",xArray);
-	free((void *)xArray);
+	Memfree((void *)xArray);
 	UDEBUG("yArrayÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",yArray);
-	free((void *)yArray);
+	Memfree((void *)yArray);
 
 	UDEBUG("»ñÈ¡×Ö·ûÏñËØ³É¹¦\r\n");
 }
@@ -286,18 +290,19 @@ static void CharaterNormalized(vu8 *CharacterMatrix,vu8 *BinaryImage)
 	vu16 CharacterImageDeltax=0,CharacterImageDeltay=0,i,j;
 	vu8 *pCharacterMatrix=CharacterMatrix;
   
-	vu8 *TmpCharacterMatrixImage=(vu8 *)malloc(240*320*sizeof(vu8));
+	vu8 *TmpCharacterMatrixImage=(vu8 *)Memalloc(240*320*sizeof(vu8));
 	vu8 *pTmpCharacterMatrixImage=TmpCharacterMatrixImage;
 	if(TmpCharacterMatrixImage!=NULL)	UDEBUG("TmpCharacterMatrixImageÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",TmpCharacterMatrixImage);		
  	else UDEBUG("TmpCharacterMatrixImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 
-	vu8 *CharacterImage=(vu8 *)malloc(240*320*sizeof(vu8));
+	vu8 *CharacterImage=(vu8 *)Memalloc(240*320*sizeof(vu8));
 	if(CharacterImage!=NULL)	UDEBUG("CharacterImageÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",CharacterImage);		
  	else UDEBUG("CharacterImageÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 	
 	vu8 *pSaveCharacterImage=CharacterImage;
 	vu8 *pTmpSaveCharacterImage=CharacterImage;
-	SaveCharacterImage(pSaveCharacterImage,BinaryImage);
+	vu8 *pBinaryImage = BinaryImage;
+	SaveCharacterImage(pSaveCharacterImage,pBinaryImage);
 
 	
 	while(CharacterNumToCapture)
@@ -424,11 +429,11 @@ static void CharaterNormalized(vu8 *CharacterMatrix,vu8 *BinaryImage)
 			}
 	  }
 	}
-//	free((void *)TmpCharacterMatrixImage);
+
 	UDEBUG("TmpCharacterMatrixImageÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",TmpCharacterMatrixImage);
-	free((void *)TmpCharacterMatrixImage);
+	Memfree((void *)TmpCharacterMatrixImage);
 	UDEBUG("CharacterImageÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",CharacterImage);
-	free((void *)CharacterImage);
+	Memfree((void *)CharacterImage);
 
 	UDEBUG("¹éÒ»»¯³É¹¦\r\n");
 }
@@ -448,21 +453,21 @@ void CharacterCompareFromExflash(vu8 *BinaryImage,vu16 *Character_GB2312) //´æ´¢
 	wordAddr+=FLASH_12CHAR_ADDR;
 	tmpwordAddr=wordAddr;
 
-	vu16 *Confidence=(vu16 *)malloc(CharacterMatchBuf*sizeof(vu16));  //¼ÇÂ¼Íâ²¿flash´Ö±È¶Ô»º³åÇø×ÖÄ£ÖÃĞÅ¶È£¬Æä±êÖ¾ÊıºÍ»º³åÇøÒ»ÖÂ£¬²»ÄÜ´òÂÒ
+	vu16 *Confidence=(vu16 *)Memalloc(CharacterMatchBuf*sizeof(vu16));  //¼ÇÂ¼Íâ²¿flash´Ö±È¶Ô»º³åÇø×ÖÄ£ÖÃĞÅ¶È£¬Æä±êÖ¾ÊıºÍ»º³åÇøÒ»ÖÂ£¬²»ÄÜ´òÂÒ
 	vu16 *TmpCharacter_GB2312=Character_GB2312,*pConfidence=Confidence;
 	if(Confidence!=NULL)	UDEBUG("ConfidenceÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",Confidence);		
  	else UDEBUG("ConfidenceÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 
-	u32 *CharacterMatch=(u32 *)malloc(CharacterMatchBuf*sizeof(u32));;  //´æ´¢´ÓÍâ²¿flash¶ÁÈ¡µÄ´Ö±È¶Ô³É¹¦µÄ×ÖÄ£µØÖ·
+	u32 *CharacterMatch=(u32 *)Memalloc(CharacterMatchBuf*sizeof(u32));;  //´æ´¢´ÓÍâ²¿flash¶ÁÈ¡µÄ´Ö±È¶Ô³É¹¦µÄ×ÖÄ£µØÖ·
 	u32 *pCharacterMatch=CharacterMatch;
 	if(CharacterMatch!=NULL)	UDEBUG("CharacterMatchÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",CharacterMatch);		
  	else UDEBUG("CharacterMatchÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 
-	vu8 *CharacterMatrix=(vu8 *)malloc(32*CharacterNumToCapture*sizeof(vu8));    //×ÖÄ£Îª16*16£¬¼´32*8Î»£¬×î¶à´æ´¢20¸ö×Ö
+	vu8 *CharacterMatrix=(vu8 *)Memalloc(32*CharacterNumToCapture*sizeof(vu8));    //×ÖÄ£Îª16*16£¬¼´32*8Î»£¬×î¶à´æ´¢20¸ö×Ö
 	if(CharacterMatrix!=NULL)	UDEBUG("CharacterMatrixÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",CharacterMatrix);		
  	else UDEBUG("CharacterMatrixÄÚ´æ·ÖÅäÊ§°Ü\r\n");
-	vu8 *pCharacterMatrix=CharacterMatrix,*pCharacterMatrixTmp=pCharacterMatrix;
-	CharaterNormalized(pCharacterMatrix,BinaryImage);
+	vu8 *pCharacterMatrix=CharacterMatrix,*pCharacterMatrixTmp=pCharacterMatrix,*pBinaryImage = BinaryImage;
+	CharaterNormalized(pCharacterMatrix,pBinaryImage);
 	
 	for(j=1;j<=CharacterNumToCapture;j++)
 	{
@@ -550,11 +555,11 @@ void CharacterCompareFromExflash(vu8 *BinaryImage,vu16 *Character_GB2312) //´æ´¢
 	}
 	
 	UDEBUG("CharacterMatrixÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",CharacterMatrix);
-  free((void *)CharacterMatrix);
+  Memfree((void *)CharacterMatrix);
 	UDEBUG("ConfidenceÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",Confidence);
-	free((void *)Confidence);
+	Memfree((void *)Confidence);
 	UDEBUG("CharacterMatchÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",CharacterMatch);
-  free((void *)CharacterMatch);
+  Memfree((void *)CharacterMatch);
 
 	UDEBUG("Ê¶±ğÍê³É\r\n");
 }

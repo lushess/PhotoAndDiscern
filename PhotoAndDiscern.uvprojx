@@ -681,9 +681,9 @@
               <FilePath>.\FreeRTOS\port\RVDS\ARM_CM3\port.c</FilePath>
             </File>
             <File>
-              <FileName>heap_4.c</FileName>
+              <FileName>heap_5.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\FreeRTOS\port\MemMang\heap_4.c</FilePath>
+              <FilePath>.\FreeRTOS\port\MemMang\heap_5.c</FilePath>
             </File>
           </Files>
         </Group>
