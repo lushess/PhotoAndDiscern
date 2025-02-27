@@ -109,7 +109,7 @@ static void AppTaskCreate(void)
 													(const char*    )"camera_refresh",/* 任务名字 */
 													(uint16_t       )0x400,  /* 任务栈大小 */
 													(void*          )NULL,/* 任务入口函数参数 */
-													(UBaseType_t    )5, /* 任务的优先级 */
+													(UBaseType_t    )7, /* 任务的优先级 */
 													(TaskHandle_t*  )&camera_refresh_Handle);/* 任务控制块指针 */ 		
 	 if(pdPASS == xReturn)
 			UDEBUG("创建camera_refresh任务成功!\r\n");
@@ -265,9 +265,9 @@ int main()
 	
 	GPIOF_Pin0_5_BeUsedFor_SRAMEX();
 	
-	//初始化freeRTOS内存
-	extern HeapRegion_t xHeapRegions[];
-	vPortDefineHeapRegions( xHeapRegions );
+//	//初始化freeRTOS内存
+//	extern HeapRegion_t xHeapRegions[];
+//	vPortDefineHeapRegions( xHeapRegions );
 		
 	MemInfo_UDEBUG(); //输出内存信息
 		

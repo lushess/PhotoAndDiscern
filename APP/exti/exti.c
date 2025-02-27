@@ -214,7 +214,7 @@ void EXTI9_5_IRQHandler(void)
 			OV7670_WRST=0;	//复位写指针		  		 
 			OV7670_WRST=1;	
 			OV7670_WREN=1;	//允许写入FIFO 	 
-			ov_sta = 0xff;		//帧中断标记 
+			ov_sta = 0xff;		//帧中断标记
 		}
 		else if(0xff == ov_sta)
 		{			

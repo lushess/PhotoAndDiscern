@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "system.h"
+#include "Config/Config.h"
 
 //#define myAssertCalled(char,int) printf("Error:%s,%d\r\n",char,int)
 //#define myASSERT(x) if((x)==0) myAssertCalled(__FILE__,__LINE__)
@@ -23,7 +24,15 @@ extern "C" {
 #define S8FromHSV745(HSV745)  (vu8)(((HSV745>>5)&0x0f)*255/15)
 #define V8FromHSV745(HSV745)  (vu8)((HSV745&0x1f)*255/31)
 
-	
+#define imagePixel_H		240
+#define imagePixel_V		320
+
+
+#ifdef USE_EXRAM_IMAGE_BUFFER
+#define imageBuffer_Num		3		//受限于外部SRAM的总大小，至多为3
+extern volatile uint8_t imageBuffer[imageBuffer_Num][imagePixel_H*imagePixel_V];
+#endif //USE_EXRAM_IMAGE_BUFFER
+
 //位图文件头
 typedef __packed struct
 {

@@ -87,9 +87,6 @@
 #ifdef USE_FREERTOS_MALLOCATOR
 		#define Memalloc pvPortMalloc
 		#define Memfree vPortFree
-#else
-		#define Memalloc malloc
-		#define Memfree free
 #endif //USE_FREERTOS_MALLOCATOR
 
 //断言
@@ -188,13 +185,13 @@ do{\
 #define configIDLE_SHOULD_YIELD					1           
 
 //启用队列
-#define configUSE_QUEUE_SETS					  1    
+#define configUSE_QUEUE_SETS					  0    
 
 //开启任务通知功能，默认开启
 #define configUSE_TASK_NOTIFICATIONS    1   
 
 //使用互斥信号量
-#define configUSE_MUTEXES						    0   
+#define configUSE_MUTEXES						    1   
 
 //使用递归互斥信号量                                            
 #define configUSE_RECURSIVE_MUTEXES			0   
@@ -216,7 +213,7 @@ do{\
 //支持静态内存
 #define configSUPPORT_STATIC_ALLOCATION					0					
 //系统所有总的堆大小
-//#define configTOTAL_HEAP_SIZE			FREERTOS_HEAP_SIZE 
+#define configTOTAL_HEAP_SIZE			FREERTOS_HEAP_SIZE_INRAM 
 
 /***************************************************************
              FreeRTOS与钩子函数有关的配置选项                                            
@@ -303,15 +300,15 @@ extern volatile uint32_t CPU_RunTime;
 /************************************************************
             FreeRTOS可选函数配置选项                                                     
 ************************************************************/
-#define INCLUDE_xTaskGetSchedulerState       1                       
-#define INCLUDE_vTaskPrioritySet		         1
-#define INCLUDE_uxTaskPriorityGet		         1
+#define INCLUDE_xTaskGetSchedulerState       0                       
+#define INCLUDE_vTaskPrioritySet		         0
+#define INCLUDE_uxTaskPriorityGet		         0
 #define INCLUDE_vTaskDelete				           1
-#define INCLUDE_vTaskCleanUpResources	       1
-#define INCLUDE_vTaskSuspend			           1
+#define INCLUDE_vTaskCleanUpResources	       0
+#define INCLUDE_vTaskSuspend			           0
 #define INCLUDE_vTaskDelayUntil			         1
 #define INCLUDE_vTaskDelay				           1
-#define INCLUDE_eTaskGetState			           1
+#define INCLUDE_eTaskGetState			           0
 #define INCLUDE_xTimerPendFunctionCall	     0
 #define INCLUDE_xTaskGetCurrentTaskHandle       1
 //#define INCLUDE_uxTaskGetStackHighWaterMark     0

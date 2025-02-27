@@ -1,4 +1,5 @@
 #include "user_task.h"
+#include "Config/Config.h"
 //#include "lvgl/lvgl.h"
 #include "font_show.h"
 #include <stdlib.h>
@@ -11,7 +12,6 @@
 //#include "Utils/lv_ext/lv_obj_ext_func.h"
 //#include "Utils/lv_ext/lv_anim_timeline_wrapper.h"
 #include "FATFS_APP/fatfs_app.h"
-#include "Config/Config.h"
 #include "usart.h"
 //#include "Utils/PageManager/PageManager.h"
 
@@ -133,11 +133,12 @@ void photo(void)
 
 	while(1)
 	{
+		taskHead:
 		ulTaskNotifyTake(pdTRUE,portMAX_DELAY); //等待任务通知
 		LCD_Display_Dir(0);
     LCD_Set_Window(0,0,240-1,320-1);		
 
-    path = (char *)Memalloc(sizeof(FIL));
+    path = (char *)Memalloc(64*sizeof(char));
 		
 		sprintf(path,"%s%s%d",SDCARD_PHOTO_PATH_DEFAULT,"/",photocount);
 		if(f_open(file,path,FA_CREATE_ALWAYS|FA_WRITE) == FR_OK)
@@ -152,7 +153,12 @@ void photo(void)
 			{
 				f_close(file);
 				f_open(file,path,FA_OPEN_ALWAYS|FA_WRITE);
-			} 
+			}
+			else {
+				UDEBUG("文件打开失败");
+				Memfree((void *)path);
+				goto taskHead;
+			}
 		}
 		
     Memfree((void *)path);
@@ -239,8 +245,11 @@ void discern(void)//识别
 		{
 				GPIOF_Pin0_5_BeUsedFor_SRAMEX();
 
-		    //vu8 MedianfilterCout;
+		    #ifdef USE_EXRAM_IMAGE_BUFFER
+				vu8 *image = imageBuffer[0],*Tmpimage=image;
+				#else
 				vu8 *image=(vu8 *)Memalloc(76800*sizeof(vu8)),*Tmpimage=image;
+				#endif //USE_EXRAM_IMAGE_BUFFER
 				if(image!=NULL)	UDEBUG("image内存分配成功,其地址为:%p\r\n",image);		
 				else UDEBUG("image内存分配失败\r\n");			
 				vu16 *character=(vu16 *)Memalloc(CharacterNumToCapture),*Tmpcharacter=character;
@@ -261,12 +270,13 @@ void discern(void)//识别
 			
 				CapLCDToGray(image);                    //读取LCD屏，并存储到SRAM
 				UDEBUG("读取LCD完成，已转换为灰度图");
-		//		MedianfilterCout=3;
-		//		while(MedianfilterCout--)
-		//		{
-		//			image=Tmpimage;
-		//			Medianfilter(image);                   //灰度图中值滤波
-		//		}
+				u8 MedianfilterCout;
+				MedianfilterCout=3;
+				while(MedianfilterCout--)
+				{
+					image=Tmpimage;
+					MedianFilter(image);                   //灰度图中值滤波
+				}
 				ShowGrayToLCD(image);                  //打印灰度图到LCD屏
 				GrayEven(image); 											//灰度图均匀化
 				GrayToBinary(image);                    //灰度图转化为二值图 
@@ -274,7 +284,7 @@ void discern(void)//识别
 		//		while(MedianfilterCout--)
 		//		{
 		//			image=Tmpimage;
-		//			Medianfilter(image);                   //二值图中值滤波
+		//			MedianFilter(image);                   //二值图中值滤波
 		//		}		
 		//		MedianfilterCout=3;
 		//		while(MedianfilterCout--)
@@ -305,10 +315,13 @@ void discern(void)//识别
 				{
 				  //TODO:
 				
-				}				
+				}			
 				
+				#ifdef USE_EXRAM_IMAGE_BUFFER
+				#else
 				UDEBUG("image内存已释放,其地址为:%p\r\n",image);
 				Memfree((void *)image);
+				#endif //USE_EXRAM_IMAGE_BUFFER
 				UDEBUG("character内存已释放,其地址为:%p\r\n",character);
 		    Memfree((void *)character);			
 				

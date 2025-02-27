@@ -391,16 +391,6 @@
               <FilePath>.\User\stm32f10x_it.c</FilePath>
             </File>
             <File>
-              <FileName>FreeRTOSConfig.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\User\FreeRTOSConfig.h</FilePath>
-            </File>
-            <File>
-              <FileName>Config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\User\App\Config\Config.h</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\User\main.c</FilePath>
@@ -409,6 +399,16 @@
               <FileName>user_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\User\Task\user_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>Config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\User\Config\Config.h</FilePath>
+            </File>
+            <File>
+              <FileName>FreeRTOSConfig.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\User\Config\FreeRTOSConfig.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -640,6 +640,11 @@
               <FileType>1</FileType>
               <FilePath>.\Public\retarget.c</FilePath>
             </File>
+            <File>
+              <FileName>ringbuffer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Public\ringbuffer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -681,9 +686,9 @@
               <FilePath>.\FreeRTOS\port\RVDS\ARM_CM3\port.c</FilePath>
             </File>
             <File>
-              <FileName>heap_5.c</FileName>
+              <FileName>heap_4.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\FreeRTOS\port\MemMang\heap_5.c</FilePath>
+              <FilePath>.\FreeRTOS\port\MemMang\heap_4.c</FilePath>
             </File>
           </Files>
         </Group>

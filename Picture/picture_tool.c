@@ -2,7 +2,6 @@
 #include "tftlcd.h"
 #include "flash.h"
 #include "usart.h"
-#include "Config/Config.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +9,10 @@
 #ifdef USE_FREERTOS_MALLOCATOR
 #include "freeRTOS.h"
 #endif //USE_FREERTOS_MALLOCATOR
+
+#ifdef USE_EXRAM_IMAGE_BUFFER
+__EXRAM volatile uint8_t imageBuffer[imageBuffer_Num][imagePixel_H*imagePixel_V];
+#endif //USE_EXRAM_IMAGE_BUFFER
 
 bmpinfo_t bmpinfo __INRAM = {NULL};
 
