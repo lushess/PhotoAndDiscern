@@ -2,20 +2,10 @@
 #include "tftlcd.h"
 #include "flash.h"
 #include "usart.h"
-
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef USE_FREERTOS_MALLOCATOR
-#include "freeRTOS.h"
-#endif //USE_FREERTOS_MALLOCATOR
-
-#ifdef USE_EXRAM_IMAGE_BUFFER
-__EXRAM volatile uint8_t imageBuffer[imageBuffer_Num][imagePixel_H*imagePixel_V];
-#endif //USE_EXRAM_IMAGE_BUFFER
-
 bmpinfo_t bmpinfo __INRAM = {NULL};
-
 
 static void fastsort(vu8 *arrayhead,vu8 *arrayend)
 {
@@ -904,7 +894,8 @@ static void CalcGrayHist_Chance(volatile float *histchance,vu8 *GrayImage) //¼ÆË
 	vu8 *pGrayImage=GrayImage;
 	vu16 i,j;
 	volatile float *phistchance=histchance;
-  vu32 *hist=(vu32 *)Memalloc(256*sizeof(vu32)),*phist=hist;
+	vu32 hist[256];
+	vu32 *phist=hist;
 
 	for(j=1;j<=320;j++)
 	{
@@ -920,8 +911,6 @@ static void CalcGrayHist_Chance(volatile float *histchance,vu8 *GrayImage) //¼ÆË
 		phistchance++;
 		phist++;
 	}
-
-	Memfree((void *)hist);
 }
 
 static void GrayImageMapping_ByChanceHist(vu8 *mapping,vu8 *GrayImage)
@@ -929,8 +918,10 @@ static void GrayImageMapping_ByChanceHist(vu8 *mapping,vu8 *GrayImage)
 	vu16 i,j;
   vu8 *pGrayImage=GrayImage,*pmapping=mapping;
   
-	volatile float *addupchance=(float *)Memalloc(256*sizeof(float)),*paddupchance=addupchance;
-	volatile float *histchance=(float *)Memalloc(256*sizeof(float)),*pChanceTmp=histchance;
+	volatile float addupchance[256];
+	volatile float *paddupchance=addupchance;
+	volatile float histchance[256];
+	volatile float *pChanceTmp=histchance;
 	CalcGrayHist_Chance(histchance,pGrayImage);
 		
 	
@@ -945,9 +936,6 @@ static void GrayImageMapping_ByChanceHist(vu8 *mapping,vu8 *GrayImage)
 		paddupchance++;
 		pChanceTmp++;
 	}	
-	
-  Memfree((void *)histchance);
-  Memfree((void *)addupchance);
 }
 
 void GrayEven(vu8 *GrayImage)  //»Ò¶ÈÍ¼¾ùÔÈ»¯
@@ -956,7 +944,8 @@ void GrayEven(vu8 *GrayImage)  //»Ò¶ÈÍ¼¾ùÔÈ»¯
 	vu8 *pGrayImage=GrayImage;
 	vu16 i,j;
 	
-	vu8 *mapping=(vu8 *)Memalloc(256*sizeof(vu8)),*pmapping=mapping;
+	vu8 mapping[256];
+	vu8 *pmapping=mapping;
 	GrayImageMapping_ByChanceHist(mapping,pGrayImage);
 
 	
@@ -969,9 +958,6 @@ void GrayEven(vu8 *GrayImage)  //»Ò¶ÈÍ¼¾ùÔÈ»¯
 			*pGrayImage++=pmapping[image]; 			
 		}		
 	}
-	
-  Memfree((void *)mapping);
-
 }
 
 void GrayChange_Linear(vu8 *GrayImage,float modulus,int8_t trans) //ÏßÐÔ¸Ä±ä»Ò¶ÈÖµ
@@ -999,7 +985,7 @@ static vu8 CalcThresold_SimpleTwoPeak_ByGrayHist(vu8 *GrayImage)
 	vu8 *pGrayImage=GrayImage;
 	vu16 i,j,itmp,jtmp;
 	vu32 histMax=0,histSecond=0;
-  vu32 *hist=(vu32 *)Memalloc(256*sizeof(vu32));
+  vu32 hist[256];
 
 	for(j=1;j<=320;j++)
 	{
@@ -1055,8 +1041,6 @@ static vu8 CalcThresold_SimpleTwoPeak_ByGrayHist(vu8 *GrayImage)
   if(jfindpeak!=0&&jtmp!=0)GrayForbinary=(vu8)jtmp;
 	else if(ifindpeak!=0&&itmp!=256)GrayForbinary=(vu8)itmp;
 	
-	Memfree((void *)hist);
-
 	UDEBUG("µÃµ½»Ò¶ÈÍ¼ãÐÖµ£¡\r\n");
   return GrayForbinary; //·µ»ØÖµ×÷Îª¶þÖµ»¯µÄãÐÖµ
 }

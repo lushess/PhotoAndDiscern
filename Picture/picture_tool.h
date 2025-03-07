@@ -7,6 +7,7 @@ extern "C" {
 
 #include "system.h"
 #include "Config/Config.h"
+#include "picturememorymanager.h"
 
 //#define myAssertCalled(char,int) printf("Error:%s,%d\r\n",char,int)
 //#define myASSERT(x) if((x)==0) myAssertCalled(__FILE__,__LINE__)

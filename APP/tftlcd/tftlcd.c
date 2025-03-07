@@ -49,7 +49,7 @@ void TFTLCD_FSMC_Init(void)
 
 	FSMC_ReadTimingInitStructure.FSMC_AddressSetupTime = 0x01;	 //地址建立时间（ADDSET）为2个HCLK 1/36M=27ns
   	FSMC_ReadTimingInitStructure.FSMC_AddressHoldTime = 0x00;	 //地址保持时间（ADDHLD）模式A未用到	
-  	FSMC_ReadTimingInitStructure.FSMC_DataSetupTime = 0x0f;		 // 数据保存时间为16个HCLK,因为液晶驱动IC的读数据的时候，速度不能太快，尤其对1289这个IC。
+  	FSMC_ReadTimingInitStructure.FSMC_DataSetupTime = 0x0f;		 // 数据保存时间为16个HCLK,因为液晶驱动IC的读数据的时候，速度不能太快。
   	FSMC_ReadTimingInitStructure.FSMC_BusTurnAroundDuration = 0x00;
   	FSMC_ReadTimingInitStructure.FSMC_CLKDivision = 0x00;
   	FSMC_ReadTimingInitStructure.FSMC_DataLatency = 0x00;
@@ -93,7 +93,7 @@ void TFTLCD_FSMC_Init(void)
   	FSMC_NORSRAMInitStructure.FSMC_MemoryDataWidth = FSMC_MemoryDataWidth_16b;//存储器数据宽度为16bit   
   	FSMC_NORSRAMInitStructure.FSMC_BurstAccessMode =FSMC_BurstAccessMode_Disable;// FSMC_BurstAccessMode_Disable; 
   	FSMC_NORSRAMInitStructure.FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_Low;
-	FSMC_NORSRAMInitStructure.FSMC_AsynchronousWait=FSMC_AsynchronousWait_Disable; 
+		FSMC_NORSRAMInitStructure.FSMC_AsynchronousWait=FSMC_AsynchronousWait_Disable; 
   	FSMC_NORSRAMInitStructure.FSMC_WrapMode = FSMC_WrapMode_Disable;   
   	FSMC_NORSRAMInitStructure.FSMC_WaitSignalActive = FSMC_WaitSignalActive_BeforeWaitState;  
   	FSMC_NORSRAMInitStructure.FSMC_WriteOperation = FSMC_WriteOperation_Enable;	//  存储器写使能
@@ -113,22 +113,14 @@ void TFTLCD_FSMC_Init(void)
 //cmd:寄存器值
 __inline void LCD_WriteCmd(u16 cmd)
 {
-
-#ifdef TFTLCD_R61509V3	
 	TFTLCD->LCD_CMD=cmd;//写入要写的寄存器序号
-#endif
-	
 }
 
 //写数据
 //data:要写入的值
 __inline void LCD_WriteData(u16 data)
 {
-
-#ifdef TFTLCD_R61509V3	
 	TFTLCD->LCD_DATA=data;//写入要写的寄存器序号
-#endif
-	
 }
 
 __inline void LCD_WriteCmdData(u16 cmd,u16 data)
@@ -150,22 +142,14 @@ u32 LCD_RGBColor_Change(u16 color)
 }
 __inline void LCD_WriteData_Color(u16 color)
 {
-	
-#ifdef TFTLCD_R61509V3
-			TFTLCD->LCD_DATA=color;
-#endif
-
+		TFTLCD->LCD_DATA=color;
 }
 
 //读数据
 //返回值:读到的值
 u16 LCD_ReadData(void)
 {
-
-#ifdef TFTLCD_R61509V3
 	return TFTLCD->LCD_DATA;
-#endif
-	
 }
 
 
@@ -174,31 +158,24 @@ u16 LCD_ReadData(void)
 void LCD_Display_Dir(u8 dir)
 {
 	if(dir==0)  //默认竖屏方向
-	{		
-		
-#ifdef TFTLCD_R61509V3		
+	{			
 		LCD_WriteCmd(0x0001);   
 		LCD_WriteData(0x0100);
 		LCD_WriteCmd(0x0003);
 		LCD_WriteData(0x1030);
 		tftlcd_data.height=400;
 		tftlcd_data.width=240;
-#endif
 		
 		tftlcd_data.dir=0;
-		
 	}
 	else
-	{	
-
-#ifdef TFTLCD_R61509V3		
+	{		
 		LCD_WriteCmd(0x0001);   
 		LCD_WriteData(0x0000);
 		LCD_WriteCmd(0x0003);
 		LCD_WriteData(0x1038);
 		tftlcd_data.height=240;
 		tftlcd_data.width=400;
-#endif
 		
 		tftlcd_data.dir=1;
 	}	
@@ -212,14 +189,11 @@ void TFTLCD_Init(void)
 	
 	delay_ms(50); 
 	
-#ifdef TFTLCD_R61509V3	
 	LCD_WriteCmd(0X0000);				   	
 	tftlcd_data.id=LCD_ReadData();    
-#endif	
 	
 	UDEBUG(" LCD ID:%x\r\n",tftlcd_data.id); //打印LCD ID
 
-#ifdef TFTLCD_R61509V3
 	/* --R61509V_CPT3.0 --- */
 
 	LCD_WriteCmd(0x0000);
@@ -286,8 +260,7 @@ void TFTLCD_Init(void)
 	LCD_WriteCmd(0x0201); LCD_WriteData(0x0000);
 	delay_ms(10);
 	LCD_WriteCmd(0x0202);
-#endif
-
+	
 	LCD_Display_Dir(TFTLCD_DIR);		//0：竖屏  1：横屏  默认竖屏
 	LCD_Clear(WHITE);
 }
@@ -297,9 +270,7 @@ void TFTLCD_Init(void)
 //width,height:窗口宽度和高度,必须大于0!!
 //窗体大小:width*height. 
 void LCD_Set_Window(u16 sx,u16 sy,u16 width,u16 height)
-{    	
-
-#ifdef TFTLCD_R61509V3	
+{    		
 	if(tftlcd_data.dir==0)
 	{
 		LCD_WriteCmd(0x0210);   
@@ -333,8 +304,6 @@ void LCD_Set_Window(u16 sx,u16 sy,u16 width,u16 height)
 	    LCD_WriteData(sy);	
 	}
 	LCD_WriteCmd(0x0202);
-#endif
-
 }
 
 //清屏函数
@@ -427,14 +396,11 @@ u16 LCD_ReadPoint(u16 x,u16 y)
 	
 	if(x>=tftlcd_data.width||y>=tftlcd_data.height)return 0;	//超过了范围,直接返回		     
 	LCD_Set_Window(x, y, x, y);
-
-
-#ifdef TFTLCD_R61509V3	
+	
 	LCD_WriteCmd(0X0202);     		 				    
  	r=LCD_ReadData();								//dummy Read	   
  	r=LCD_ReadData(); 
 	r=LCD_ReadData();	  						
-#endif
 
  	return r;						
 }
@@ -835,12 +801,12 @@ void LCD_DMA_Init(void)
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;//外设数据长度:16位
 	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;//存储器数据长度:16位
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;// 使用普通模式 
-	DMA_InitStructure.DMA_Priority = DMA_Priority_High;//优先级
+	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;//优先级
 	DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;  //DMA通道设置为内存到内存传输
 	DMA_Init(DMA2_Channel5, &DMA_InitStructure);//初始化DMA Stream
 	
 	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Channel4_5_IRQn;//中断通道
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=3;//抢占优先级
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=8;//抢占优先级
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority =0;		//子优先级
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
 	NVIC_Init(&NVIC_InitStructure);	
@@ -851,6 +817,7 @@ void LCD_DMA_Init(void)
 void LCD_DMA_Enable(u16 *src, u16 ndtr)
 {
   DMA_Cmd(DMA2_Channel5, DISABLE);                      //关闭DMA传输 	
+	DMA_ClearFlag(DMA2_FLAG_TC5);
 	DMA2_Channel5->CMAR = (uint32_t)src;
 	DMA_SetCurrDataCounter(DMA2_Channel5,ndtr);          //数据传输量   
 	DMA_Cmd(DMA2_Channel5, ENABLE);                      //开启DMA传输 

@@ -142,7 +142,7 @@ void key_EXTI_Init(void)
 void EXTI0_IRQHandler(void)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-  if(EXTI_GetITStatus(EXTI_Line0)==1) vTaskNotifyGiveFromISR((TaskHandle_t	)key_scan_task_Handle,&xHigherPriorityTaskWoken);
+  if(EXTI_GetITStatus(EXTI_Line0)==SET) vTaskNotifyGiveFromISR((TaskHandle_t	)key_scan_task_Handle,&xHigherPriorityTaskWoken);
 	EXTI_ClearITPendingBit(EXTI_Line0);
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
@@ -156,7 +156,7 @@ void EXTI0_IRQHandler(void)
 void EXTI3_IRQHandler(void)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	if(EXTI_GetITStatus(EXTI_Line3)==1) vTaskNotifyGiveFromISR((TaskHandle_t	)key_scan_task_Handle,&xHigherPriorityTaskWoken);
+	if(EXTI_GetITStatus(EXTI_Line3)==SET) vTaskNotifyGiveFromISR((TaskHandle_t	)key_scan_task_Handle,&xHigherPriorityTaskWoken);
 	EXTI_ClearITPendingBit(EXTI_Line3);
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
@@ -170,7 +170,7 @@ void EXTI3_IRQHandler(void)
 void EXTI2_IRQHandler(void)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	if(EXTI_GetITStatus(EXTI_Line2)==1) vTaskNotifyGiveFromISR((TaskHandle_t	)key_scan_task_Handle,&xHigherPriorityTaskWoken);
+	if(EXTI_GetITStatus(EXTI_Line2)==SET) vTaskNotifyGiveFromISR((TaskHandle_t	)key_scan_task_Handle,&xHigherPriorityTaskWoken);
 	EXTI_ClearITPendingBit(EXTI_Line2);
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
@@ -184,7 +184,7 @@ void EXTI2_IRQHandler(void)
 void EXTI4_IRQHandler(void)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	if(EXTI_GetITStatus(EXTI_Line4)==1) vTaskNotifyGiveFromISR((TaskHandle_t	)key_scan_task_Handle,&xHigherPriorityTaskWoken);
+	if(EXTI_GetITStatus(EXTI_Line4)==SET) vTaskNotifyGiveFromISR((TaskHandle_t	)key_scan_task_Handle,&xHigherPriorityTaskWoken);
 	EXTI_ClearITPendingBit(EXTI_Line4);
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
@@ -214,10 +214,13 @@ void EXTI9_5_IRQHandler(void)
 			OV7670_WRST=0;	//复位写指针		  		 
 			OV7670_WRST=1;	
 			OV7670_WREN=1;	//允许写入FIFO 	 
-			ov_sta = 0xff;		//帧中断标记
+			ov_sta = 0x0f;		//帧中断标记
+//			xTaskNotifyFromISR((TaskHandle_t	)camera_refresh_Handle,(uint32_t	)REFRESH_EVENT,(eNotifyAction)eSetBits,&xHigherPriorityTaskWoken);
 		}
-		else if(0xff == ov_sta)
+		else if(0x0f == ov_sta)
 		{			
+			OV7670_WREN=0;	//停止写入FIFO
+			ov_sta = 0xff;
 			xTaskNotifyFromISR((TaskHandle_t	)camera_refresh_Handle,(uint32_t	)REFRESH_EVENT,(eNotifyAction)eSetBits,&xHigherPriorityTaskWoken);
 		}
 	}

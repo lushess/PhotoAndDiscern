@@ -16,7 +16,7 @@ extern "C" {
 //#define Charater_LightColor  1
 #define Charater_xmaxForNormalization      16
 #define Charater_ymaxForNormalization      16
-#define CharacterNumToCapture              3
+#define CharacterNumToCapture              1
 #define CharacterErrorThreshold            10
 #define CharacterMatchBuf                  5
 #define WordCompareFromExflash             0x23ee      //(0xe0-0xb0-1)*190+0xa1-0x41+0xed-0x41£¬¼´´Ó°¡×Öµ½¿Ú×Ö

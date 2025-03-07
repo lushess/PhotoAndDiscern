@@ -675,6 +675,11 @@
               <FileType>1</FileType>
               <FilePath>.\Picture\characterdiscern.c</FilePath>
             </File>
+            <File>
+              <FileName>picturememorymanager.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Picture\picturememorymanager.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

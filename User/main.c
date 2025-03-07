@@ -128,7 +128,7 @@ static void AppTaskCreate(void)
 	
 	 xReturn = xTaskCreate((TaskFunction_t )discern,  /* 任务入口函数 */
                         (const char*    )"discern",/* 任务名字 */
-                        (uint16_t       )0x400,  /* 任务栈大小 */
+                        (uint16_t       )0x1000,  /* 任务栈大小 */
                         (void*          )NULL,/* 任务入口函数参数 */
                         (UBaseType_t    )10, /* 任务的优先级 */
                         (TaskHandle_t*  )&discern_Handle);/* 任务控制块指针 */ 
@@ -240,7 +240,7 @@ int main()
 	LCD_ShowFont12Char(10, 50, "摄像头应用--OV7670");
 	
 	GPIOF_Pin0_5_BeUsedFor_OV7670();
-	delay_ms(1000);
+	while(OV7670_Init()&&i!=0xff)i++;
 	i=OV7670_Init();
 	if (0 == i){
 		UDEBUG("OV7670初始化完成\r\n");
@@ -264,12 +264,8 @@ int main()
 	LCD_Clear(BLACK);
 	
 	GPIOF_Pin0_5_BeUsedFor_SRAMEX();
-	
-//	//初始化freeRTOS内存
-//	extern HeapRegion_t xHeapRegions[];
-//	vPortDefineHeapRegions( xHeapRegions );
 		
-	MemInfo_UDEBUG(); //输出内存信息
+	//MemInfo_UDEBUG(); //输出内存信息
 		
 	xReturn = xTaskCreate((TaskFunction_t )AppTaskCreate,  /* 任务入口函数 */
                         (const char*    )"AppTaskCreate",/* 任务名字 */

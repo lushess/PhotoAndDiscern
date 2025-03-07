@@ -84,10 +84,10 @@
 //#endif
 
 //ÄÚ´æ·ÖÅäÆ÷
-#ifdef USE_FREERTOS_MALLOCATOR
-		#define Memalloc pvPortMalloc
-		#define Memfree vPortFree
-#endif //USE_FREERTOS_MALLOCATOR
+//#ifdef USE_FREERTOS_MALLOCATOR
+//		#define Memalloc pvPortMalloc
+//		#define Memfree vPortFree
+//#endif //USE_FREERTOS_MALLOCATOR
 
 //¶ÏÑÔ
 #define vAssertCalled(char,int) //printf("Error:%s,%d\r\n",char,int)

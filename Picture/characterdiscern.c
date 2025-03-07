@@ -7,10 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef USE_FREERTOS_MALLOCATOR
-#include "freeRTOS.h"
-#endif //USE_FREERTOS_MALLOCATOR
-
 static u8 calcCharacterBit(vu8 *CharacterMatrix)
 {
 	vu8 sum=0,tim=32;
@@ -40,17 +36,18 @@ static void calcGridBit(vu8 *CharacterMatrix,vu8 *Grid)
 		CharacterMatrix++;
 	}
 }
-static u16 FindMaxNumFromArray(vu16 *array,vu16 size)
+static u16 FindMaxNumFromArray(vu16 *array,vu16 len)
 {
   vu16 i,temp=0,flag=0;
-	for(i=0;i<size;i++)
+	vu16 *parray = array;
+	for(i=0;i<len;i++)
 	{		
-	  if(temp<*array) 
+	  if(temp<*parray) 
 		{
-			temp=*array;
+			temp=*parray;
 			flag=i;
 		}
-    array++;		
+    parray++;		
 	}
 	return flag;
 }
@@ -135,9 +132,7 @@ static void CharacterSegmentation_x(vu16 *xArray,vu8 *BinaryImage)//xÊý×éÃ¿Á½¸öÔ
   vu16 j;
 	vu16 *pxArray=xArray;
 	
-	vu16 *ChangePointArray_V=(vu16 *)Memalloc(240*sizeof(vu16));
-	if(ChangePointArray_V!=NULL)	UDEBUG("ChangePointArray_VÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_V);		
- 	else UDEBUG("ChangePointArray_VÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	vu16 ChangePointArray_V[240];
 	
 	vu16 *pChangePointArray_V=ChangePointArray_V;
 	CalcChangePoint_V(pChangePointArray_V,BinaryImage);
@@ -156,11 +151,7 @@ static void CharacterSegmentation_x(vu16 *xArray,vu8 *BinaryImage)//xÊý×éÃ¿Á½¸öÔ
 		}
 		pChangePointArray_V++;
 	}
-	*pxArray=0;  //×÷Îª¾²Ì¬Êý×éxArrayÌØÕ÷µã,µü´úÊ±ÅÐ¶ÏÒÔ×÷Í£Ö¹
-	
-	UDEBUG("ChangePointArray_VÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_V);
-	Memfree((void *)ChangePointArray_V);
-	
+	*pxArray=0;  //×÷Îª¾²Ì¬Êý×éxArrayÌØÕ÷µã,µü´úÊ±ÅÐ¶ÏÒÔ×÷Í£Ö¹	
 }
 static void CharacterSegmentation_y(vu16 *yArray,vu8 *BinaryImage)//yÊý×éÃ¿Á½¸öÔªËØ·Ö±ð±íÊ¾yup,ylow
 {
@@ -168,9 +159,7 @@ static void CharacterSegmentation_y(vu16 *yArray,vu8 *BinaryImage)//yÊý×éÃ¿Á½¸öÔ
   vu16 i;
 	vu16 *pyArray=yArray;
 	
-	vu16 *ChangePointArray_H=(vu16 *)Memalloc(320*sizeof(vu16));
-	if(ChangePointArray_H!=NULL)	UDEBUG("ChangePointArray_VÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_H);		
- 	else UDEBUG("ChangePointArray_HÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	vu16 ChangePointArray_H[320];
 	
 	vu16 *pChangePointArray_H = ChangePointArray_H;
 	CalcChangePoint_H(ChangePointArray_H,BinaryImage);
@@ -190,10 +179,6 @@ static void CharacterSegmentation_y(vu16 *yArray,vu8 *BinaryImage)//yÊý×éÃ¿Á½¸öÔ
 		pChangePointArray_H++;
 	}
 	*pyArray=0;
-	
-	UDEBUG("ChangePointArray_HÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",ChangePointArray_H);
-	Memfree((void *)ChangePointArray_H);
-
 }
 
 static void SaveCharacterImage(vu8 *CharacterImage,vu8 *BinaryImage)//CharacterImageÓÃÓÚ´æ´¢×Ö·ûÏñËØ£¬ÆäÖÐÓÃ0x0f¸ô¿ª
@@ -205,17 +190,11 @@ static void SaveCharacterImage(vu8 *CharacterImage,vu8 *BinaryImage)//CharacterI
 	vu16 xleft,xright,yup,ylow,deltax,deltay,i,j,tmpxleft,tmpdeltax;
 	u32 shifty,shiftx;
 	
-	vu16 *xArray=(vu16 *)Memalloc(240*sizeof(vu16));
-	if(xArray!=NULL)	UDEBUG("xArrayÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",xArray);		
- 	else UDEBUG("xArrayÄÚ´æ·ÖÅäÊ§°Ü\r\n");
-	
+	vu16 xArray[240];
 	vu16 *pCharacterSegmentation_x=xArray; 
 	CharacterSegmentation_x(pCharacterSegmentation_x,TmpBinaryImage);
 	
-	vu16 *yArray=(vu16 *)Memalloc(320*sizeof(vu16));
-	if(yArray!=NULL)	UDEBUG("yArrayÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",yArray);		
- 	else UDEBUG("yArrayÄÚ´æ·ÖÅäÊ§°Ü\r\n");
-	
+	vu16 yArray[320];
   vu16 *pCharacterSegmentation_y=yArray;
 	CharacterSegmentation_y(pCharacterSegmentation_y,TmpBinaryImage);
 
@@ -275,11 +254,6 @@ static void SaveCharacterImage(vu8 *CharacterImage,vu8 *BinaryImage)//CharacterI
 		}
 	}	
   *pCharacterImage=0xf0;       //ÊäÈëÊý×é½áÊøÌØÕ÷Öµ
-	
-	UDEBUG("xArrayÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",xArray);
-	Memfree((void *)xArray);
-	UDEBUG("yArrayÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",yArray);
-	Memfree((void *)yArray);
 
 	UDEBUG("»ñÈ¡×Ö·ûÏñËØ³É¹¦\r\n");
 }
@@ -453,22 +427,17 @@ void CharacterCompareFromExflash(vu8 *BinaryImage,vu16 *Character_GB2312) //´æ´¢
 	wordAddr+=FLASH_12CHAR_ADDR;
 	tmpwordAddr=wordAddr;
 
-	vu16 *Confidence=(vu16 *)Memalloc(CharacterMatchBuf*sizeof(vu16));  //¼ÇÂ¼Íâ²¿flash´Ö±È¶Ô»º³åÇø×ÖÄ£ÖÃÐÅ¶È£¬Æä±êÖ¾ÊýºÍ»º³åÇøÒ»ÖÂ£¬²»ÄÜ´òÂÒ
+	vu16 Confidence[CharacterMatchBuf];  //¼ÇÂ¼Íâ²¿flash´Ö±È¶Ô»º³åÇø×ÖÄ£ÖÃÐÅ¶È£¬Æä±êÖ¾ÊýºÍ»º³åÇøÒ»ÖÂ£¬²»ÄÜ´òÂÒ
 	vu16 *TmpCharacter_GB2312=Character_GB2312,*pConfidence=Confidence;
-	if(Confidence!=NULL)	UDEBUG("ConfidenceÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",Confidence);		
- 	else UDEBUG("ConfidenceÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 
-	u32 *CharacterMatch=(u32 *)Memalloc(CharacterMatchBuf*sizeof(u32));;  //´æ´¢´ÓÍâ²¿flash¶ÁÈ¡µÄ´Ö±È¶Ô³É¹¦µÄ×ÖÄ£µØÖ·
+	u32 CharacterMatch[CharacterMatchBuf];;  //´æ´¢´ÓÍâ²¿flash¶ÁÈ¡µÄ´Ö±È¶Ô³É¹¦µÄ×ÖÄ£µØÖ·
 	u32 *pCharacterMatch=CharacterMatch;
-	if(CharacterMatch!=NULL)	UDEBUG("CharacterMatchÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",CharacterMatch);		
- 	else UDEBUG("CharacterMatchÄÚ´æ·ÖÅäÊ§°Ü\r\n");
 
-	vu8 *CharacterMatrix=(vu8 *)Memalloc(32*CharacterNumToCapture*sizeof(vu8));    //×ÖÄ£Îª16*16£¬¼´32*8Î»£¬×î¶à´æ´¢20¸ö×Ö
-	if(CharacterMatrix!=NULL)	UDEBUG("CharacterMatrixÄÚ´æ·ÖÅä³É¹¦,ÆäµØÖ·Îª:%p\r\n",CharacterMatrix);		
- 	else UDEBUG("CharacterMatrixÄÚ´æ·ÖÅäÊ§°Ü\r\n");
+	vu8 CharacterMatrix[32*CharacterNumToCapture];    //×ÖÄ£Îª16*16£¬¼´32*8Î»£¬×î¶à´æ´¢20¸ö×Ö
 	vu8 *pCharacterMatrix=CharacterMatrix,*pCharacterMatrixTmp=pCharacterMatrix,*pBinaryImage = BinaryImage;
 	CharaterNormalized(pCharacterMatrix,pBinaryImage);
 	
+	UDEBUG("¿ªÊ¼±éÀú×Ö¿â\r\n");
 	for(j=1;j<=CharacterNumToCapture;j++)
 	{
 		pCharacterMatrixTmp=pCharacterMatrix;   //Ö¸Ïò×ÖÄ£Î»Êý×é
@@ -509,6 +478,7 @@ void CharacterCompareFromExflash(vu8 *BinaryImage,vu16 *Character_GB2312) //´æ´¢
 	
 		pCharacterMatch=CharacterMatch;
 		pConfidence=Confidence;
+		UDEBUG("¿ªÊ¼±È¶Ô×ÖÄ£\r\n");
     for(coutCharacterMatchBuf=0;coutCharacterMatchBuf<CharacterMatchBuf;coutCharacterMatchBuf++)//ÏÖ×ÖÄ£±È¶ÔÔ¤É¸Ñ¡»º³åÇøÄÚµÄ×ÖÄ£
     {				
       pCharacterExflash=CharacterExflash;			
@@ -536,9 +506,11 @@ void CharacterCompareFromExflash(vu8 *BinaryImage,vu16 *Character_GB2312) //´æ´¢
 		}
 //		pCharacterMatch=CharacterMatch;
 		pConfidence=Confidence;
-		ConfindeceFlag=FindMaxNumFromArray(pConfidence,32);
+		ConfindeceFlag=FindMaxNumFromArray(pConfidence,CharacterMatchBuf);
 		
-		wordAddr=*(CharacterMatch+ConfindeceFlag); //Íâ²¿flashµØÖ·Ö¸Ïò¶Ô±ÈÖÃÐÅ¶È×î¸ßµÄ×ÖÄ£µØÖ·
+		wordAddr=CharacterMatch[ConfindeceFlag]; //Íâ²¿flashµØÖ·Ö¸Ïò¶Ô±ÈÖÃÐÅ¶È×î¸ßµÄ×ÖÄ£µØÖ·
+		UDEBUG("CharacterMatch+ConfindeceFlagµØÖ·Îª:%p\r\n",&CharacterMatch[ConfindeceFlag]);
+		UDEBUG("ÆäÄÚÈÝ:%d\r\n",wordAddr);
 		
 		wordAddr-=FLASH_12CHAR_ADDR;   //½âÎöÎªGB2312±àÂë
 		wordAddr/=32;
@@ -554,12 +526,5 @@ void CharacterCompareFromExflash(vu8 *BinaryImage,vu16 *Character_GB2312) //´æ´¢
 		pCharacterMatrix+=32;
 	}
 	
-	UDEBUG("CharacterMatrixÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",CharacterMatrix);
-  Memfree((void *)CharacterMatrix);
-	UDEBUG("ConfidenceÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",Confidence);
-	Memfree((void *)Confidence);
-	UDEBUG("CharacterMatchÄÚ´æÒÑÊÍ·Å,ÆäµØÖ·Îª:%p\r\n",CharacterMatch);
-  Memfree((void *)CharacterMatch);
-
 	UDEBUG("Ê¶±ðÍê³É\r\n");
 }

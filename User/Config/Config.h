@@ -7,6 +7,7 @@
 
 #define __EXRAM    __attribute__((section("EXRAM")))     
 #define __INRAM    __attribute__((section("INRAM"))) 
+#define __USED	   __attribute__((used)) //∑¿÷π±‡“Î∆˜”≈ªØ
 
 #define __ALIGN(x) __attribute__((align(x)))
 
@@ -55,7 +56,7 @@
 #define INRAM_TOTAL               ((size_t)(0x00010000))
 
 /* FREERTOS */
-#define FREERTOS_HEAP_SIZE_INRAM 	((size_t)(0x00004000))
+#define FREERTOS_HEAP_SIZE_INRAM 	((size_t)(0x0000A000))
 //#define FREERTOS_HEAP_SIZE_EXRAM 	((size_t)(0x0003FA00))
 
 

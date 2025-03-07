@@ -49,7 +49,6 @@ void camera_refresh(void)
                             0xffffffffUL,	   //退出函数的时候清除所有bit
                             &current_event,		  //保存任务通知值                    
                             portMAX_DELAY);	//阻塞时间
-		//vTaskDelay(500);
 		if( pdTRUE == xReturn )
 		{ 
 				last_event|=current_event;
@@ -64,15 +63,14 @@ void camera_refresh(void)
 				  EXTI_ITConfig(EXTI_Line7,ENABLE);
 				}
 				
-				if(last_event&(ENREFRESH_EVENT|REFRESH_EVENT)&&ov_sta!=0)
+				if(last_event&(ENREFRESH_EVENT|REFRESH_EVENT)&&ov_sta == 0xff)
 				{
 						last_event&=~REFRESH_EVENT;
 					
 				    LCD_Display_Dir(1);
-						//LCD_Set_Window((tftlcd_data.width-320)/2,(tftlcd_data.height-240)/2,320,240-1);//将显示区域设置到屏幕中央
-					  taskENTER_CRITICAL();           //进入临界区
 						LCD_Set_Window(0,(tftlcd_data.height-240)/2,320-1,240-1);//将显示区域设置到屏幕中央
-						
+					
+						EXTI_ITConfig(EXTI_Line7,DISABLE);
 						GPIOF_Pin0_5_BeUsedFor_OV7670();//由于SRAMEX和OV7670的FIFO有部分GPIO共用，设置GPIOF，Pin0_5用于FIFO
 
 						OV7670_RRST=0;				//开始复位读指针 
@@ -97,7 +95,6 @@ void camera_refresh(void)
             ov_sta=0;						
 					  GPIOF_Pin0_5_BeUsedFor_SRAMEX();//由于SRAMEX和OV7670的FIFO有部分GPIO共用，设置GPIOF，Pin0_5用于SRAMEX
 					  EXTI_ITConfig(EXTI_Line7,ENABLE);
-						taskEXIT_CRITICAL();            //退出临界区
 			  }
 		 }
   }
@@ -140,7 +137,7 @@ void photo(void)
 
     path = (char *)Memalloc(64*sizeof(char));
 		
-		sprintf(path,"%s%s%d",SDCARD_PHOTO_PATH_DEFAULT,"/",photocount);
+		snprintf(path,64*sizeof(char),"%s%s%d",SDCARD_PHOTO_PATH_DEFAULT,"/",photocount);
 		if(f_open(file,path,FA_CREATE_ALWAYS|FA_WRITE) == FR_OK)
 		{
 		   f_close(file);
@@ -148,7 +145,7 @@ void photo(void)
 		}
 		else 
 		{
-			sprintf(path,"%s%s%d",FLASH_PHOTO_PATH_DEFAULT,"/",photocount);
+			snprintf(path,64*sizeof(char),"%s%s%d",FLASH_PHOTO_PATH_DEFAULT,"/",photocount);
 			if(f_open(file,path,FA_CREATE_ALWAYS|FA_WRITE) == FR_OK)
 			{
 				f_close(file);
@@ -232,6 +229,7 @@ void discern(void)//识别
 //	
 //  lv_anim_timeline_add_wrapper(anim_timeline, wrapper);
 
+	imageBufStat_Init(); //初始化image内存缓冲区状态结构体;
 	while(1)
 	{
 		xReturn = xTaskNotifyWait(0xffffffffUL,		//进入函数的时候清除任务bit
@@ -245,17 +243,11 @@ void discern(void)//识别
 		{
 				GPIOF_Pin0_5_BeUsedFor_SRAMEX();
 
-		    #ifdef USE_EXRAM_IMAGE_BUFFER
-				vu8 *image = imageBuffer[0],*Tmpimage=image;
-				#else
-				vu8 *image=(vu8 *)Memalloc(76800*sizeof(vu8)),*Tmpimage=image;
-				#endif //USE_EXRAM_IMAGE_BUFFER
+				vu8 *image=(vu8 *)Memalloc(240*320*sizeof(vu8)),*Tmpimage=image;
 				if(image!=NULL)	UDEBUG("image内存分配成功,其地址为:%p\r\n",image);		
 				else UDEBUG("image内存分配失败\r\n");			
-				vu16 *character=(vu16 *)Memalloc(CharacterNumToCapture),*Tmpcharacter=character;
-				if(character!=NULL)	UDEBUG("character内存分配成功,其地址为:%p\r\n",character);		
-				else UDEBUG("character内存分配失败\r\n");
-
+				vu16 character[CharacterNumToCapture];
+				vu16 *Tmpcharacter=character;
 			
 			  /* 显示UI */			  
 //			  lv_obj_set_style_opa(bar,LV_OPA_100,0);
@@ -274,8 +266,7 @@ void discern(void)//识别
 				MedianfilterCout=3;
 				while(MedianfilterCout--)
 				{
-					image=Tmpimage;
-					MedianFilter(image);                   //灰度图中值滤波
+//					MedianFilter(image);                   //灰度图中值滤波
 				}
 				ShowGrayToLCD(image);                  //打印灰度图到LCD屏
 				GrayEven(image); 											//灰度图均匀化
@@ -309,23 +300,18 @@ void discern(void)//识别
 ////			    lv_obj_fade_out(label,500,0);					
 //					lv_anim_timeline_set_reverse(anim_timeline,false); //动画正序
 //          lv_anim_timeline_start(anim_timeline);
-					UDEBUG("识别成功，字符为:%s",(char*)character);
+					UDEBUG("识别成功，字符为:%s\r\n",(char*)character);
 				}	
 				else if(current_event&EAN13_DISCERN)
 				{
 				  //TODO:
 				
 				}			
-				
-				#ifdef USE_EXRAM_IMAGE_BUFFER
-				#else
+
 				UDEBUG("image内存已释放,其地址为:%p\r\n",image);
 				Memfree((void *)image);
-				#endif //USE_EXRAM_IMAGE_BUFFER
-				UDEBUG("character内存已释放,其地址为:%p\r\n",character);
-		    Memfree((void *)character);			
 				
-				MemInfo_UDEBUG(); //输出内存信息
+				//MemInfo_UDEBUG(); //输出内存信息
 				
         //GPIOF_Pin0_5_BeUsedFor_OV7670();//由于SRAMEX和OV7670的FIFO有部分GPIO共用，设置GPIOF，Pin0_5用于FIFO
 				xTaskNotify((TaskHandle_t	)camera_refresh_Handle,
