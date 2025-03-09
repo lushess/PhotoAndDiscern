@@ -5,6 +5,7 @@ DebugConfig/
 */x64/
 *.env
 *.log
+*log*
 *_log
 *.o
 *.obj
