@@ -1,6 +1,6 @@
 #include "user_task.h"
 #include "Config/Config.h"
-//#include "lvgl/lvgl.h"
+#include "lvgl/lvgl.h"
 #include "font_show.h"
 #include <stdlib.h>
 #include "ov7670.h"
@@ -9,17 +9,17 @@
 #include "picture_tool.h"
 #include "characterdiscern.h"
 #include "ean13_barcode.h"
-//#include "Utils/lv_ext/lv_obj_ext_func.h"
-//#include "Utils/lv_ext/lv_anim_timeline_wrapper.h"
+#include "Utils/lv_ext/lv_obj_ext_func.h"
+#include "Utils/lv_ext/lv_anim_timeline_wrapper.h"
 #include "FATFS_APP/fatfs_app.h"
 #include "usart.h"
-//#include "Utils/PageManager/PageManager.h"
+#include "Utils/PageManager/PageManager.h"
 
 TaskHandle_t camera_refresh_Handle = NULL;
 TaskHandle_t discern_Handle = NULL;
 TaskHandle_t photo_Handle = NULL;
 
-//__align(32) PageManager::Switch_Info_t *swinfo __INRAM;
+__align(32) PageManager::Switch_Info_t *swinfo __INRAM;
 extern FATFS *fs[_VOLUMES];  
 extern FIL *file;	 
 extern FIL *ftemp;	 
@@ -29,11 +29,11 @@ extern DIR *dir;
 extern u8 fs_ready_status[_VOLUMES];//磁盘状态，为0表示就绪
 extern u8 *fatbuf;//数据缓存区，大小为1024个字节
 
-//#define ANIM_DEF(start_time, obj, attr, start, end) \
-//    {start_time, obj, LV_ANIM_EXEC(attr), start, end, 500, lv_anim_path_ease_out, true}
+#define ANIM_DEF(start_time, obj, attr, start, end) \
+    {start_time, obj, LV_ANIM_EXEC(attr), start, end, 500, lv_anim_path_ease_out, true}
 
-//#define ANIM_OPA_DEF(start_time, obj) \
-//    ANIM_DEF(start_time, obj, opa_scale, LV_OPA_COVER,LV_OPA_TRANSP) //透明度从255到0
+#define ANIM_OPA_DEF(start_time, obj) \
+    ANIM_DEF(start_time, obj, opa_scale, LV_OPA_COVER,LV_OPA_TRANSP) //透明度从255到0
 
 void camera_refresh(void)
 {
@@ -243,34 +243,34 @@ void discern(void)//识别
 		{
 				GPIOF_Pin0_5_BeUsedFor_SRAMEX();
 
-				vu8 *image=(vu8 *)Memalloc(240*320*sizeof(vu8)),*Tmpimage=image;
-				if(image!=NULL)	UDEBUG("image内存分配成功,其地址为:%p\r\n",image);		
-				else UDEBUG("image内存分配失败\r\n");			
-				vu16 character[CharacterNumToCapture];
-				vu16 *Tmpcharacter=character;
+//				vu8 *image=(vu8 *)Memalloc(240*320*sizeof(vu8)),*Tmpimage=image;
+//				if(image!=NULL)	UDEBUG("image内存分配成功,其地址为:%p\r\n",image);		
+//				else UDEBUG("image内存分配失败\r\n");			
+//				vu16 character[CharacterNumToCapture];
+//				vu16 *Tmpcharacter=character;
 			
 			  /* 显示UI */			  
-//			  lv_obj_set_style_opa(bar,LV_OPA_100,0);
-//			  lv_obj_set_style_opa(label,LV_OPA_100,0);
-//			  lv_obj_refresh_style(bar,0,LV_STYLE_BG_OPA);//刷新样式
-//			  lv_obj_refresh_style(label,0,LV_STYLE_BG_OPA);//刷新样式
-////			  lv_bar_set_value(bar,0,LV_ANIM_OFF);
-////			  lv_obj_fade_in(bar,500,0);
-////			  lv_obj_fade_in(label,500,0);
-//			  lv_anim_timeline_set_reverse(anim_timeline,true); //动画翻转
-//        lv_anim_timeline_start(anim_timeline);
+			  lv_obj_set_style_opa(bar,LV_OPA_100,0);
+			  lv_obj_set_style_opa(label,LV_OPA_100,0);
+			  lv_obj_refresh_style(bar,0,LV_STYLE_BG_OPA);//刷新样式
+			  lv_obj_refresh_style(label,0,LV_STYLE_BG_OPA);//刷新样式
+//			  lv_bar_set_value(bar,0,LV_ANIM_OFF);
+//			  lv_obj_fade_in(bar,500,0);
+//			  lv_obj_fade_in(label,500,0);
+			  lv_anim_timeline_set_reverse(anim_timeline,true); //动画翻转
+        lv_anim_timeline_start(anim_timeline);
 			
-				CapLCDToGray(image);                    //读取LCD屏，并存储到SRAM
-				UDEBUG("读取LCD完成，已转换为灰度图");
-				u8 MedianfilterCout;
-				MedianfilterCout=3;
-				while(MedianfilterCout--)
-				{
-//					MedianFilter(image);                   //灰度图中值滤波
-				}
-				ShowGrayToLCD(image);                  //打印灰度图到LCD屏
-				GrayEven(image); 											//灰度图均匀化
-				GrayToBinary(image);                    //灰度图转化为二值图 
+//				CapLCDToGray(image);                    //读取LCD屏，并存储到SRAM
+//				UDEBUG("读取LCD完成，已转换为灰度图");
+//				u8 MedianfilterCout;
+//				MedianfilterCout=3;
+//				while(MedianfilterCout--)
+//				{
+////					MedianFilter(image);                   //灰度图中值滤波
+//				}
+//				ShowGrayToLCD(image);                  //打印灰度图到LCD屏
+//				GrayEven(image); 											//灰度图均匀化
+//				GrayToBinary(image);                    //灰度图转化为二值图 
 		//		MedianfilterCout=3;
 		//		while(MedianfilterCout--)
 		//		{
@@ -284,39 +284,39 @@ void discern(void)//识别
 		//			CloseOperation(image);                 //开运算                 
 		//		}		
 
-				ShowBinaryToLCD(image);               //把二值图打印到LCD屏
+//				ShowBinaryToLCD(image);               //把二值图打印到LCD屏
 //        lv_bar_set_value(bar,80,LV_ANIM_ON);
-				if(current_event&CHARA_DISCERN)
-				{
-					CharacterCompareFromExflash(image,character); //从外部FLASH读取(16*16)字模进行比对，存储字符编码到character数组
+//				if(current_event&CHARA_DISCERN)
+//				{
+//					CharacterCompareFromExflash(image,character); //从外部FLASH读取(16*16)字模进行比对，存储字符编码到character数组
 					//LCD_ShowFont12Char_FromBuf(10,360, (u8*)character,CharacterNumToCapture);
 
 				  /* 隐藏UI */
-//					lv_obj_set_style_opa(bar,LV_OPA_0,0);
-//					lv_obj_set_style_opa(label,LV_OPA_0,0);
-//					lv_obj_refresh_style(bar,0,LV_STYLE_BG_OPA);//刷新样式
-//					lv_obj_refresh_style(label,0,LV_STYLE_BG_OPA);//刷新样式	
-////          lv_obj_fade_out(bar,500,0);
-////			    lv_obj_fade_out(label,500,0);					
-//					lv_anim_timeline_set_reverse(anim_timeline,false); //动画正序
-//          lv_anim_timeline_start(anim_timeline);
-					UDEBUG("识别成功，字符为:%s\r\n",(char*)character);
-				}	
-				else if(current_event&EAN13_DISCERN)
-				{
-				  //TODO:
-				
-				}			
+					lv_obj_set_style_opa(bar,LV_OPA_0,0);
+					lv_obj_set_style_opa(label,LV_OPA_0,0);
+					lv_obj_refresh_style(bar,0,LV_STYLE_BG_OPA);//刷新样式
+					lv_obj_refresh_style(label,0,LV_STYLE_BG_OPA);//刷新样式	
+//          lv_obj_fade_out(bar,500,0);
+//			    lv_obj_fade_out(label,500,0);					
+					lv_anim_timeline_set_reverse(anim_timeline,false); //动画正序
+          lv_anim_timeline_start(anim_timeline);
+//					UDEBUG("识别成功，字符为:%s\r\n",(char*)character);
+//				}	
+//				else if(current_event&EAN13_DISCERN)
+//				{
+//				  //TODO:
+//				
+//				}			
 
-				UDEBUG("image内存已释放,其地址为:%p\r\n",image);
-				Memfree((void *)image);
+//				UDEBUG("image内存已释放,其地址为:%p\r\n",image);
+//				Memfree((void *)image);
 				
 				//MemInfo_UDEBUG(); //输出内存信息
 				
         //GPIOF_Pin0_5_BeUsedFor_OV7670();//由于SRAMEX和OV7670的FIFO有部分GPIO共用，设置GPIOF，Pin0_5用于FIFO
-				xTaskNotify((TaskHandle_t	)camera_refresh_Handle,
-                        (uint32_t	)ENREFRESH_EVENT,
-                        (eNotifyAction)eSetBits);
+//				xTaskNotify((TaskHandle_t	)camera_refresh_Handle,
+//                        (uint32_t	)ENREFRESH_EVENT,
+//                        (eNotifyAction)eSetBits);
 		}							
 	}
 }

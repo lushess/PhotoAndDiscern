@@ -25,15 +25,15 @@
 
 #define USE_FREERTOS		1
 
-//内存管理器
-#define USE_FREERTOS_MALLOCATOR_ENABLE		1  //注意调用freeRTOS内存分配函数所分配内存的范围
-		#if USE_FREERTOS_MALLOCATOR_ENABLE
-				#define USE_FREERTOS_MALLOCATOR
-		#else
-				#include <string.h>
-				#define Memalloc malloc
-				#define Memfree free
-		#endif //USE_FREERTOS_MALLOCATOR_ENABLE
+////内存管理器
+//#define USE_FREERTOS_MALLOCATOR_ENABLE		1  //注意调用freeRTOS内存分配函数所分配内存的范围
+//		#if USE_FREERTOS_MALLOCATOR_ENABLE
+//				#define USE_FREERTOS_MALLOCATOR
+//		#else
+//				#include <string.h>
+//				#define Memalloc malloc
+//				#define Memfree free
+//		#endif //USE_FREERTOS_MALLOCATOR_ENABLE
 
 #define USE_EXRAM_IMAGE_BUFFER_ENABLE		1		//外部SRAM图像缓冲区使能
 		#if USE_EXRAM_IMAGE_BUFFER_ENABLE
