@@ -14,7 +14,7 @@ public:
     void AppearAnimStart(bool reverse = false);
     void DriOptAnimStart(bool reverse = false);
     void KeyboardAnimStart(bool reverse = false);
-    void AddBtnToFileList(uint32_t nbtn, const char** pbtntxt, lv_event_cb_t btnclick_event_cb);
+    void AddBtnToFileList(uint32_t nbtn, const char* pbtntxt, lv_event_cb_t btnclick_event_cb);
     void ClearFileList();
 public:   
     struct

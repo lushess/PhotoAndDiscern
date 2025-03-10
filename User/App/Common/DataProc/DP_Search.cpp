@@ -6,7 +6,7 @@
 
 extern lv_fs_file_t lv_file;
 extern lv_fs_dir_t lv_dir;
-extern char *dirfilename[DIRFILENUM];
+extern char dirfilename[DIRFILENUM];
 
 extern FATFS *fs[_VOLUMES];  
 extern FIL *file;	 
@@ -32,7 +32,7 @@ static int onEvent(Account* account, Account::EventParam_t* param)
     DataProc::Search_Info_t* info = (DataProc::Search_Info_t*)param->data_p;
 
     FRESULT res;
-    char** dfn = dirfilename;
+    char* dfn = dirfilename;
     uint32_t filenum = 0;
     
     LV_ASSERT_NULL(info->dir);
@@ -43,12 +43,12 @@ static int onEvent(Account* account, Account::EventParam_t* param)
     {
         while(1)
         {
-            *dfn = new char[128];
-            sprintf(*dfn,"%s%s",info->dir,"/");
+            dfn = dirfilename;
+            sprintf(dfn,"%s%s",info->dir,"/");
             // strcpy(*dfn,info->dir);
             // strcat(*dfn,"/");
 #if _USE_LFN         
-            strcat(*dfn,fileinfo->lfname);
+            strcat(dfn,fileinfo->lfname);
 #else
             strcat(*dfn,fileinfo->fname);
 #endif /*_USE_LFN*/			
@@ -64,7 +64,7 @@ static int onEvent(Account* account, Account::EventParam_t* param)
     }
     
     info->npfilename = filenum;
-    info->pfilename = dirfilename;
+    info->pfilename = dfn;
 
     // account->Commit(&info, sizeof(info));
     // account->Publish();

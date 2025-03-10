@@ -34,6 +34,4 @@ void discern(void);
 }
 #endif /* extern "C" */
 
-void TaskSwitchTo(void);
-
 #endif /* __USER_TASK_H */

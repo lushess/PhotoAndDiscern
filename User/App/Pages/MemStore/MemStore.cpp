@@ -173,7 +173,7 @@ void MemStore::Update()
 
 void MemStore::onFilelistupdate(bool en)
 {
-    const char** pfilename;
+    const char* pfilename;
     uint32_t nfilename;
 
     if(en)

@@ -37,7 +37,7 @@ do{\
 
 PageBase* AppFactory::CreatePage(const char* name)
 {
-    APP_CLASS_MATCH(Template);
+//    APP_CLASS_MATCH(Template);
     APP_CLASS_MATCH(Camera);
     APP_CLASS_MATCH(MemStore);
     APP_CLASS_MATCH(Startup);

@@ -1,5 +1,4 @@
 #include "DataProc.h"
-//#include "../HAL/HAL.h"
 #include "lvgl/lvgl.h"
 #include "../App/beep/beep.h"
 

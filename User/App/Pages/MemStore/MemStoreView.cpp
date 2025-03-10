@@ -312,7 +312,7 @@ void MemStoreView::AppearAnimStart(bool reverse)
     lv_anim_timeline_start(ui.anim_timeline);
 }
 
-void MemStoreView::AddBtnToFileList(uint32_t nbtn, const char** pbtntxt, lv_event_cb_t btnclick_event_cb)
+void MemStoreView::AddBtnToFileList(uint32_t nbtn, const char* pbtntxt, lv_event_cb_t btnclick_event_cb)
 {
     lv_obj_t * btn;
     /* lv_list_add_btn 函数会生成btn */
@@ -322,11 +322,9 @@ void MemStoreView::AddBtnToFileList(uint32_t nbtn, const char** pbtntxt, lv_even
     while(nbtn--)
     {
         //btn = lv_list_add_btn(flist, LV_SYMBOL_DUMMY, *pbtntxt); //LV_SYMBOL is used;
-        btn = lv_list_add_btn(ui.filelist.flist, NULL, *pbtntxt);
+        btn = lv_list_add_btn(ui.filelist.flist, NULL, pbtntxt);
         lv_obj_add_event_cb(btn, btnclick_event_cb, LV_EVENT_CLICKED, NULL);
-        delete *pbtntxt;
-        *pbtntxt = nullptr;
-        pbtntxt++;
+
     }
 }
 

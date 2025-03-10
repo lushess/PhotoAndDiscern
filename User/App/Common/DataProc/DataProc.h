@@ -8,7 +8,7 @@
 #define DATA_PROC_INIT_STRUCT(sct) memset(&sct, 0, sizeof(sct))
 
 #define DIRFILENUM  128
-extern char *dirfilename[DIRFILENUM];
+extern char dirfilename[DIRFILENUM];
 extern lv_fs_file_t lv_file;
 extern lv_fs_dir_t lv_dir;
 

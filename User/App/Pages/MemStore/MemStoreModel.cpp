@@ -103,7 +103,7 @@ void MemStoreModel::SendPathToPicturePresentPage(const char* path)
 
 void MemStoreModel::GetSDCardDirContent(  
                             const char* dir,                                               
-                            const char** pfilename, 
+                            const char* pfilename, 
                             uint32_t nfilename
                             )
 {
@@ -111,7 +111,7 @@ void MemStoreModel::GetSDCardDirContent(
     SD_Info.cmd = DataProc::STORE_CMD_DIR_READ;
     account->Notify("SDcard",&SD_Info,sizeof(SD_Info));
 
-    pfilename = (char**)SD_Info.data;
+    pfilename = (char*)SD_Info.data;
     nfilename = SD_Info.size;
 }
 
@@ -123,7 +123,7 @@ void MemStoreModel::GetSDCardVolumeInfo(uint32_t totalSizeMB, uint32_t freeSizeM
 
 void MemStoreModel::GetFlashDirContent(  
                             const char* dir,                                               
-                            const char** pfilename, 
+                            const char* pfilename, 
                             uint32_t nfilename
                             )
 {
@@ -131,7 +131,7 @@ void MemStoreModel::GetFlashDirContent(
     Flash_Info.cmd = DataProc::STORE_CMD_DIR_READ;
     account->Notify("Flash",&Flash_Info,sizeof(Flash_Info));
 
-    pfilename = (char**)Flash_Info.data;
+    pfilename = (char*)Flash_Info.data;
     nfilename = Flash_Info.size;
 }
 

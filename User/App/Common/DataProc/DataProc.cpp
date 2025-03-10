@@ -1,6 +1,6 @@
 #include "DataProc.h"
 
-char *dirfilename[DIRFILENUM];
+char dirfilename[DIRFILENUM];
 lv_fs_file_t lv_file;
 lv_fs_dir_t lv_dir;
 

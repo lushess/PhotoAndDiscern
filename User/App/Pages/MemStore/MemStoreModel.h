@@ -32,7 +32,7 @@ public:
 
     void GetSDCardDirContent(  
                         const char* dir,                                               
-                        const char** pfilename, 
+                        const char* pfilename, 
                         uint32_t nfilename
                     );
 
@@ -40,7 +40,7 @@ public:
 
     void GetFlashDirContent( 
                         const char* dir,                                                        
-                        const char** pfilename, 
+                        const char* pfilename, 
                         uint32_t nfilename
                     );
 

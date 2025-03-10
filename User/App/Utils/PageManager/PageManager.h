@@ -142,6 +142,7 @@ public:
     }
     
     bool SwitchTo(PageBase* base, bool isEnterAct, const PageBase::Stash_t* stash = NULL);
+		static void TaskSwitchTo(void);
 private:
     /* Page Pool */
     PageBase* FindPageInPool(const char* name);
@@ -181,8 +182,8 @@ private:
     static void RootGetDragPredict(lv_coord_t* x, lv_coord_t* y);
 
     /* Switch */
-    static void onSwitchAnimFinish(lv_anim_t* a);
-    void TaskSwitchToCreate();
+    static void onSwitchAnimFinish(lv_anim_t* a); 
+		static void TaskSwitchToCreate(void);
     void SwitchAnimCreate(PageBase* base);
     void SwitchAnimTypeUpdate(PageBase* base);
     bool SwitchReqCheck();
@@ -232,10 +233,18 @@ private:
     /* Root style */
     lv_style_t* _RootDefaultStyle;
 
-    TaskHandle_t TaskSwitchTo_Handle;
+    static TaskHandle_t TaskSwitchTo_Handle;
 
-    Switch_Info_t switchinfo;
+    static Switch_Info_t switchinfo;
 
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+	void TaskSwitchTo_Wrapper(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

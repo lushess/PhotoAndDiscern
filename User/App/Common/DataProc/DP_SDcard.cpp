@@ -4,7 +4,7 @@
 
 extern lv_fs_file_t lv_file;
 extern lv_fs_dir_t lv_dir;
-extern char *dirfilename[DIRFILENUM];
+extern char dirfilename[DIRFILENUM];
 
 static int onEvent(Account* account, Account::EventParam_t* param)
 {
@@ -38,7 +38,7 @@ static int onEvent(Account* account, Account::EventParam_t* param)
     else if(info->cmd == DataProc::STORE_CMD_DIR_READ)
     {
         char name[128];
-        char** dfn = dirfilename;
+        char* dfn = dirfilename;
         uint32_t filenum = 0;
         if(lv_fs_dir_open(&lv_dir,info->path) == LV_FS_RES_OK)
         {
@@ -46,14 +46,14 @@ static int onEvent(Account* account, Account::EventParam_t* param)
             {
                 lv_fs_res_t res = lv_fs_dir_read(&lv_dir,name);
 
-                *dfn = new char[128];
+                dfn = dirfilename;
 
                 if (name[0] == '\0' || res != LV_FS_RES_OK)
                 {
                     break;
                 }
 
-                strcpy(*dfn,name);
+                strcpy(dfn,name);
                 dfn++;
                 filenum++;
             }

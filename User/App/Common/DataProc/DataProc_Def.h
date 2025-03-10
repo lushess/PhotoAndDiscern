@@ -123,7 +123,7 @@ typedef struct
 {   
     const char* dir;
     const char* namesearch;
-    const char** pfilename;
+    char* pfilename;
     uint32_t npfilename;
 } Search_Info_t;
 

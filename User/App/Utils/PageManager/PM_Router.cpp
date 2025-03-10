@@ -193,18 +193,42 @@ bool PageManager::Pop()
     );
 }
 
-extern "C" void TaskSwitchTo(void *_Manager);
-void PageManager::TaskSwitchToCreate()
+__USED __INRAM TaskHandle_t PageManager::TaskSwitchTo_Handle = NULL;
+__USED __INRAM PageManager::Switch_Info_t PageManager::switchinfo = {0};
+void PageManager::TaskSwitchTo(void)
+{
+    BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
+    while(1)
+    {
+			extern PageManager manager;
+        xReturn = xTaskNotifyWait(
+														0x0,
+														ULONG_MAX,
+														(uint32_t *)&switchinfo,
+														portMAX_DELAY
+												);
+        if(xReturn == pdPASS)
+					manager.SwitchTo(switchinfo.newNode, switchinfo.isEnterAct, switchinfo.stash);
+    }     
+} 
+
+void TaskSwitchTo_Wrapper(void)
+{
+	extern PageManager manager;
+	return manager.TaskSwitchTo();
+}
+
+void PageManager::TaskSwitchToCreate(void)
 {
     
     taskENTER_CRITICAL();           //进入临界区
     
 
         /* 创建TaskSwitchTo任务 */
-        xTaskCreate((TaskFunction_t )TaskSwitchTo, /* 任务入口函数 */
+	xTaskCreate((TaskFunction_t )TaskSwitchTo_Wrapper, /* 任务入口函数 */
                     (const char*    )"TaskSwitchTo",/* 任务名字 */
-                    (uint16_t       )0x80,   /* 任务栈大小 */
-                    (void*          )this,	/* 任务入口函数参数 */
+                    (uint16_t       )0x800,   /* 任务栈大小 */
+                    (void*          )NULL,	/* 任务入口函数参数 */
                     (UBaseType_t    )20,	    /* 任务的优先级 */
                     (TaskHandle_t*  )&TaskSwitchTo_Handle);/* 任务控制块指针 */
     

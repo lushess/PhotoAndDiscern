@@ -26,9 +26,8 @@
 #include "Pages/AppFactory.h"
 #include "Utils/PageManager/PageManager.h"
 
-#ifdef USART_OUTPUT_DEBUG
 #include "usart.h"
-#endif
+
 
 #define ACCOUNT_SEND_CMD(ACT, CMD) \
 do{ \
@@ -38,11 +37,11 @@ do{ \
     DataProc::Center()->AccountMain.Notify(#ACT, &info, sizeof(info)); \
 }while(0)
 
+AppFactory factory;
+PageManager manager(&factory);
+
 void App_Init()
 {
-    static AppFactory factory;
-    static PageManager manager(&factory);
-
 #if CONFIG_MONKEY_TEST_ENABLE
     lv_monkey_config_t config;
     lv_monkey_config_init(&config);
