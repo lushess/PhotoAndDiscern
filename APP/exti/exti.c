@@ -200,7 +200,6 @@ void EXTI_ITConfig(uint32_t EXTI_Line,FunctionalState NewState)
 
 
 volatile u8 ov_sta=0;	//帧中断标记
-extern SemaphoreHandle_t ov_vsync_Handle;
 extern TaskHandle_t camera_refresh_Handle;
 
  //外部中断5~9服务程序
@@ -215,7 +214,6 @@ void EXTI9_5_IRQHandler(void)
 			OV7670_WRST=1;	
 			OV7670_WREN=1;	//允许写入FIFO 	 
 			ov_sta = 0x0f;		//帧中断标记
-//			xTaskNotifyFromISR((TaskHandle_t	)camera_refresh_Handle,(uint32_t	)REFRESH_EVENT,(eNotifyAction)eSetBits,&xHigherPriorityTaskWoken);
 		}
 		else if(0x0f == ov_sta)
 		{			

@@ -9,19 +9,10 @@
 #define __INRAM    __attribute__((section("INRAM"))) 
 #define __USED	   __attribute__((used)) //防止编译器优化
 
-#define __ALIGN(x) __attribute__((align(x)))
+#define __ALIGN(x) __attribute__((aligned(x)))
 
 
 #define LV_COLOR_DEPTH	 16
-//#define CONFIG_LVGL_USE_SRAMEX_ENABLE    1
-//		#if CONFIG_LVGL_USE_SRAMEX_ENABLE
-//		#define CONFIG_LVGL_USE_SRAMEX
-//#endif //CONFIG_LVGL_USE_SRAMEX_ENABLE
-
-//#define CONFIG_LVGL_USE_MALLOC_ENABLE 	 1  //同时影响其他使用SRAMEX的任务
-//		#if CONFIG_LVGL_USE_MALLOC_ENABLE
-//		#define CONFIG_LVGL_USE_MALLOC
-//#endif //CONFIG_LVGL_USE_MALLOC_ENABLE
 
 #define USE_FREERTOS		1
 
@@ -35,15 +26,17 @@
 				#define Memfree free
 		#endif //USE_FREERTOS_MALLOCATOR_ENABLE
 
-#define USE_EXRAM_IMAGE_BUFFER_ENABLE		1		//外部SRAM图像缓冲区使能
+#define USE_EXRAM_IMAGE_BUFFER_ENABLE		0		//外部SRAM图像缓冲区使能
 		#if USE_EXRAM_IMAGE_BUFFER_ENABLE
 				#define USE_EXRAM_IMAGE_BUFFER
 		#endif //USE_EXRAM_IMAGE_BUFFER_ENABLE
 
 
 //DEBUG设置
+
 #define USART_OUTPUT_DEBUG_ENABLE 		1
 		#if USART_OUTPUT_DEBUG_ENABLE
+				#define USART_BOUND		9600
 				#define USART_OUTPUT_DEBUG
 				#define DEBUG_USART_USE_DMA_ENABLE    0
 						#if DEBUG_USART_USE_DMA_ENABLE
@@ -56,8 +49,11 @@
 #define INRAM_TOTAL               ((size_t)(0x00010000))
 
 /* FREERTOS */
-#define FREERTOS_HEAP_SIZE_INRAM 	((size_t)(0x0000A000))
-//#define FREERTOS_HEAP_SIZE_EXRAM 	((size_t)(0x0003FA00))
+#define FREERTOS_USE_EXRAM_ENABLE	1
+		#if	FREERTOS_USE_EXRAM_ENABLE
+				#define FREERTOS_USE_EXRAM
+		#endif //FREERTOS_USE_EXRAM_ENABLE
+#define FREERTOS_HEAP_SIZE 	((size_t)(0x00008000))
 
 
 #endif //__CONFIG_H

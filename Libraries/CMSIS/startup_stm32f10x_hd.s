@@ -32,7 +32,7 @@
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
-Stack_Size      EQU     0x00004000
+Stack_Size      EQU     0x00008000
 
                 AREA    STACK, NOINIT, READWRITE, ALIGN=3
 Stack_Mem       SPACE   Stack_Size
@@ -149,11 +149,15 @@ Reset_Handler   PROC
                 IMPORT  __main
                 IMPORT  SystemInit
 				IMPORT  FSMC_SRAM_Init
+				IMPORT	USART1_Init
 					
                 LDR     R0, =SystemInit
                 BLX     R0 
 				                
                 LDR     R0, =FSMC_SRAM_Init
+                BLX     R0
+				
+				LDR     R0, =USART1_Init
                 BLX     R0
 								
                 LDR     R0, =__main

@@ -78,6 +78,7 @@ void HardFault_Handler(void)
   */
 void MemManage_Handler(void)
 {
+	UDEBUG("内存管理故障地址:0x%lX",*(unsigned long *)SCB->MMFAR);
   /* Go to infinite loop when Memory Manage exception occurs */
   while (1)
   {
@@ -91,6 +92,7 @@ void MemManage_Handler(void)
   */
 void BusFault_Handler(void)
 {
+	UDEBUG("总线故障地址:0x%lX",*(unsigned long *)SCB->BFAR);
   /* Go to infinite loop when Bus Fault exception occurs */
   while (1)
   {

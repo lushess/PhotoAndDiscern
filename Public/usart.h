@@ -5,16 +5,15 @@
 #include "stdio.h" 
 #include "Config/Config.h"
 
-
-	
-void USART1_Init(uint32_t bound);
+void USART1_Init(void);
 void UsartRX_DMA_Init(void);
 void UsartRX_DMA_Enable(uint16_t bufsize);
 void UsartTX_DMA_Init(void);
 void UsartTX_DMA_Enable(char* buff,uint16_t bufsize);
 
-
-
+#ifndef USART_BOUND
+#define USART_BOUND		9600
+#endif 
 //串口打印调试信息，供串口调试助手查看
 #ifdef USART_OUTPUT_DEBUG
 		#ifdef DEBUG_USART_USE_DMA

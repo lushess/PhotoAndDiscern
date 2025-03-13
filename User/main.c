@@ -22,10 +22,10 @@
 #include "queue.h"
 #include "semphr.h"
 #include "user_task.h"
-//#include "lv_port_indev.h"
-//#include "lv_port_disp.h"
-//#include "lv_port_fs_Fatfs.h"
-//#include "User/App/App.h"
+#include "lv_port_indev.h"
+#include "lv_port_disp.h"
+#include "lv_port_fs_Fatfs.h"
+#include "User/App/App.h"
 
 /******************************* 全局变量声明 ************************************/
 
@@ -42,8 +42,8 @@ extern TaskHandle_t discern_Handle;
 extern TaskHandle_t photo_Handle;
 static TaskHandle_t LEDsysRunning_Handle = NULL;
 static TaskHandle_t key_press_task_Handle = NULL;
-//static TaskHandle_t LV_Task_Handle = NULL;
-//extern TaskHandle_t lv_key_scan_Handle;
+static TaskHandle_t LV_Task_Handle = NULL;
+extern TaskHandle_t lv_key_scan_Handle;
 
 /*
 *************************************************************************
@@ -51,7 +51,7 @@ static TaskHandle_t key_press_task_Handle = NULL;
 *************************************************************************
 */
 static void AppTaskCreate(void);/* 用于创建任务 */
-//static void lv_task(void); /*lvgl任务刷新*/
+static void lv_task(void); /*lvgl任务刷新*/
 static void LEDsysRunning(void);//用于指示系统处于运行
 void key_press_task(void);
 
@@ -84,15 +84,15 @@ static void AppTaskCreate(void)
     UDEBUG("创建LEDsysRunning任务成功!\r\n");
 	 else UDEBUG("创建LEDsysRunning任务失败,错误代码:%d\r\n",(int)xReturn);
 	 
-	 xReturn = xTaskCreate((TaskFunction_t )key_press_task,  /* 任务入口函数 */
-                        (const char*    )"key_press_task",/* 任务名字 */
-                        (uint16_t       )0x80,  /* 任务栈大小 */
-                        (void*          )NULL,/* 任务入口函数参数 */
-                        (UBaseType_t    )14, /* 任务的优先级 */
-                        (TaskHandle_t*  )&key_press_task_Handle);/* 任务控制块指针 */ 
-	 if(pdPASS == xReturn)
-    UDEBUG("创建key_press_task任务成功!\r\n");
-	 else UDEBUG("创建key_press_task任务失败,错误代码:%d\r\n",(int)xReturn);
+//	 xReturn = xTaskCreate((TaskFunction_t )key_press_task,  /* 任务入口函数 */
+//                        (const char*    )"key_press_task",/* 任务名字 */
+//                        (uint16_t       )0x80,  /* 任务栈大小 */
+//                        (void*          )NULL,/* 任务入口函数参数 */
+//                        (UBaseType_t    )14, /* 任务的优先级 */
+//                        (TaskHandle_t*  )&key_press_task_Handle);/* 任务控制块指针 */ 
+//	 if(pdPASS == xReturn)
+//    UDEBUG("创建key_press_task任务成功!\r\n");
+//	 else UDEBUG("创建key_press_task任务失败,错误代码:%d\r\n",(int)xReturn);
 	 
 		
 	 xReturn = xTaskCreate((TaskFunction_t )key_scan_task,  /* 任务入口函数 */
@@ -128,7 +128,7 @@ static void AppTaskCreate(void)
 	
 	 xReturn = xTaskCreate((TaskFunction_t )discern,  /* 任务入口函数 */
                         (const char*    )"discern",/* 任务名字 */
-                        (uint16_t       )0x1000,  /* 任务栈大小 */
+                        (uint16_t       )0x400,  /* 任务栈大小 */
                         (void*          )NULL,/* 任务入口函数参数 */
                         (UBaseType_t    )10, /* 任务的优先级 */
                         (TaskHandle_t*  )&discern_Handle);/* 任务控制块指针 */ 
@@ -138,49 +138,49 @@ static void AppTaskCreate(void)
 	else UDEBUG("创建discern任务失败,错误代码:%d\r\n",(int)xReturn);
 	
 	//初始化PA7中断，即OV7670的帧中断
-	EXTI7_Init();
-	ov_sta = 0;
-	EXTI_ITConfig(EXTI_Line7,ENABLE);
+//	EXTI7_Init();
+//	ov_sta = 0;
+//	EXTI_ITConfig(EXTI_Line7,ENABLE);
 	
-	key_EXTI_Init(); //按键中断初始化
+//	key_EXTI_Init(); //按键中断初始化
 	
-//	xReturn = xTaskCreate((TaskFunction_t )lv_task,  /* 任务入口函数 */
-//				(const char*    )"lv_task",/* 任务名字 */
-//				(uint16_t       )0x200,  /* 任务栈大小 */
-//				(void*          )NULL,/* 任务入口函数参数 */
-//				(UBaseType_t    )30, /* 任务的优先级 */
-//				(TaskHandle_t*  )&LV_Task_Handle);/* 任务控制块指针 */ 
-//	if(pdPASS == xReturn)
-//    UDEBUG("创建lv_task任务成功!\r\n");	
+	xReturn = xTaskCreate((TaskFunction_t )lv_task,  /* 任务入口函数 */
+				(const char*    )"lv_task",/* 任务名字 */
+				(uint16_t       )0x200,  /* 任务栈大小 */
+				(void*          )NULL,/* 任务入口函数参数 */
+				(UBaseType_t    )30, /* 任务的优先级 */
+				(TaskHandle_t*  )&LV_Task_Handle);/* 任务控制块指针 */ 
+	if(pdPASS == xReturn)
+    UDEBUG("创建lv_task任务成功!\r\n");	
 
 	
-//	lv_init();
-//	UDEBUG("lvgl初始化成功!\r\n");
-//	lv_port_disp_init();
-//	UDEBUG("lvgl屏幕初始化成功!\r\n");
-//	lv_port_indev_init();
-//	UDEBUG("lvgl设备初始化成功!\r\n");
-//	lv_port_fs_init();
-//	UDEBUG("lvgl文件系统初始化成功!\r\n");
-//	App_Init_Wrapper();
+	lv_init();
+	UDEBUG("lvgl初始化成功!\r\n");
+	lv_port_disp_init();
+	UDEBUG("lvgl屏幕初始化成功!\r\n");
+	lv_port_indev_init();
+	UDEBUG("lvgl设备初始化成功!\r\n");
+	lv_port_fs_init();
+	UDEBUG("lvgl文件系统初始化成功!\r\n");
+	App_Init_Wrapper();
 
   vTaskDelete(NULL); //删除AppTaskCreate任务
 	UDEBUG("启动任务已删除!\r\n");
   taskEXIT_CRITICAL();            //退出临界区
 }
 
-//static void lv_task(void)
-//{
-//	TickType_t xLastWakeTime;
-//	const TickType_t xPeriod = pdMS_TO_TICKS( 5 );
-//	xLastWakeTime = xTaskGetTickCount();
-//	while(1)
-//	{		
-//		xTaskDelayUntil(&xLastWakeTime,xPeriod);
-//		xTaskNotifyGive(key_scan_task_Handle); // 键盘扫描任务
-//	  lv_task_handler();
-//	}
-//}
+static void lv_task(void)
+{
+	TickType_t xLastWakeTime;
+	const TickType_t xPeriod = pdMS_TO_TICKS( 5 );
+	xLastWakeTime = xTaskGetTickCount();
+	while(1)
+	{		
+		xTaskDelayUntil(&xLastWakeTime,xPeriod);
+		xTaskNotifyGive(key_scan_task_Handle); // 键盘扫描任务
+	  lv_task_handler();
+	}
+}
 
 static void LEDsysRunning(void)//用于指示系统处于运行
 {
@@ -191,24 +191,21 @@ static void LEDsysRunning(void)//用于指示系统处于运行
 	}
 }
 
-static void key_press_task(void)//按键按压任务通知
-{
-	while(1)
-	{
-	 if(lastkey == KEY_LEFT)
-	 {
-		 lastkey = NULL;
-		 UDEBUG("LEFT键已按下，准备识别\r\n");
-		 xTaskNotify((TaskHandle_t	)discern_Handle,
-                        (uint32_t	)CHARA_DISCERN,
-                        (eNotifyAction)eSetBits);
-	 }
-	 vTaskDelay(100);
-	}
-}
-
-//const u8*LMODE_TBL[5]={"Auto","Sunny","Cloudy","Office","Home"};
-//const u8*EFFECTS_TBL[7]={"Normal","Negative","B&W","Redish","Greenish","Bluish","Antique"};	//7种特效
+//static void key_press_task(void)//按键按压任务通知
+//{
+//	while(1)
+//	{
+//	 if(lastkey == KEY_LEFT)
+//	 {
+//		 lastkey = NULL;
+//		 UDEBUG("LEFT键已按下，准备识别\r\n");
+//		 xTaskNotify((TaskHandle_t	)discern_Handle,
+//                        (uint32_t	)CHARA_DISCERN,
+//                        (eNotifyAction)eSetBits);
+//	 }
+//	 vTaskDelay(100);
+//	}
+//}
 
 int main()
 {
@@ -216,9 +213,8 @@ int main()
   BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
 	
 	SysTick_Init(72);
-//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);  //中断优先级分组4，4位用于抢占优先级最大15
-	USART1_Init(9600);
+//	USART1_Init();
 	LED_Init();
 	TFTLCD_Init();			//LCD初始化
 	KEY_Init();
@@ -229,6 +225,9 @@ int main()
 	snprintf(ExramTest, sizeof("EXRAM测试"), "EXRAM测试");
 	UDEBUG("EXRAM测试地址:%p;内容:%s",ExramTest,ExramTest); // 测试EXRAM是否正确读写
 	free ((void*)ExramTest);
+	
+	UDEBUG("LVGL起始地址LV_MEM_ADR:0x%lX",(unsigned long)LV_MEM_ADR);
+	UDEBUG("LVGL结束地址LV_MEM_ADR:0x%lX",(unsigned long)(LV_MEM_ADR+LV_MEM_SIZE));
 	
 	FRONT_COLOR=RED;//设置字体为红色 
 	BACK_COLOR=BLACK;
@@ -282,51 +281,4 @@ int main()
   else
     return -1;  
     while(1);
-/* 以下部分运行成功后不会执行	*/
-	/*
-	while(1)
-	{
-		key=KEY_Scan(0);
-		if(key)count=20;
-		switch(key)
-		{
-			case KEY_UP:           //灯光模式设置
-				lightmode++;
-				if(lightmode>4)lightmode=0;
-				OV7670_Light_Mode(lightmode);
-				sprintf((char*)sbuf,"%s",LMODE_TBL[lightmode]);
-				break;
-			case KEY_DOWN:         //饱和度
-				saturation++;
-				if(saturation>4)saturation=0;
-				OV7670_Color_Saturation(saturation);
-				sprintf((char*)sbuf,"Saturation:%d",(char)saturation-2);
-				break;	
-			case KEY_LEFT:        //亮度
-				brightness++;
-				if(brightness>4)brightness=0;
-				OV7670_Brightness(brightness);
-				sprintf((char*)sbuf,"Brightness:%d",(char)brightness-2);
-				break;
-			case KEY_RIGHT:     //对比度
-				contrast++;
-				if(contrast>4)contrast=0;
-				OV7670_Contrast(contrast);
-				sprintf((char*)sbuf,"Contrast:%d",(char)contrast-2);
-				break;
-		}
-		if(count)
-		{
-			count--;
-			LCD_ShowString((tftlcd_data.width-240)/2+30,(tftlcd_data.height-320)/2+60,200,16,16,sbuf);
-		}
-//		camera_refresh();//更新显示
-		i++;
-		if(i%20==0)
-		{
-			led1=!led1;
-		}
-		//delay_ms(5);	
-	}
-	*/
 }

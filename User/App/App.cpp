@@ -28,7 +28,6 @@
 
 #include "usart.h"
 
-
 #define ACCOUNT_SEND_CMD(ACT, CMD) \
 do{ \
     DataProc::ACT##_Info_t info; \
@@ -37,11 +36,12 @@ do{ \
     DataProc::Center()->AccountMain.Notify(#ACT, &info, sizeof(info)); \
 }while(0)
 
-AppFactory factory;
-PageManager manager(&factory);
+__INRAM static AppFactory factory;
+__INRAM static PageManager manager(&factory);
 
 void App_Init()
 {
+	
 #if CONFIG_MONKEY_TEST_ENABLE
     lv_monkey_config_t config;
     lv_monkey_config_init(&config);
@@ -96,11 +96,14 @@ void App_Init()
    // Page::StatusBar_Create(lv_layer_top());
 
     /* Initialize pages */
-    manager.Install("Template",    "Pages/_Template");
     manager.Install("Camera",      "Pages/Camera");
+		UDEBUG("Pages/Camera加载成功!!");
     manager.Install("MemStore",   "Pages/MemStore");
+		UDEBUG("Pages/MemStore加载成功!!");
     manager.Install("Startup",     "Pages/Startup");
+		UDEBUG("Pages/Startup加载成功!!");
     manager.Install("PicturePresent", "Pages/PicturePresent");
+		UDEBUG("Pages/PicturePresent加载成功!!");
 
     manager.SetGlobalLoadAnimType(PageManager::LOAD_ANIM_OVER_TOP);
 

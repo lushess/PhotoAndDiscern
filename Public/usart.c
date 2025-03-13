@@ -52,7 +52,7 @@ __INRAM char usartbuf2[DEBUG_BUFF_SIZE];
 * 输    入         : bound:波特率
 * 输    出         : 无
 *******************************************************************************/ 
-void USART1_Init(uint32_t bound)
+void USART1_Init(void)
 {
    //GPIO端口设置
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -70,12 +70,12 @@ void USART1_Init(uint32_t bound)
 	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_AF_PP;	    //复用推挽输出
 	GPIO_Init(GPIOA,&GPIO_InitStructure);  /* 初始化串口输入IO */
 	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_10;//RX			 //串口输入PA10
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_IN_FLOATING;		  //模拟输入
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_IN_FLOATING;		  //浮空输入
 	GPIO_Init(GPIOA,&GPIO_InitStructure); /* 初始化GPIO */
 	
 
    //USART1 初始化设置
-	USART_InitStructure.USART_BaudRate = bound;//波特率设置
+	USART_InitStructure.USART_BaudRate = USART_BOUND;//波特率设置
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;//字长为8位数据格式
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;//一个停止位
 	USART_InitStructure.USART_Parity = USART_Parity_No;//无奇偶校验位

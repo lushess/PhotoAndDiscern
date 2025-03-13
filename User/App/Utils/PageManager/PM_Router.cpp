@@ -22,7 +22,8 @@
  */
 #include "PageManager.h"
 #include "PM_Log.h"
-#include "User/Task/user_task.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
  /**
    * @brief  Enter a new page, replace the old page
@@ -193,14 +194,13 @@ bool PageManager::Pop()
     );
 }
 
-__USED __INRAM TaskHandle_t PageManager::TaskSwitchTo_Handle = NULL;
-__USED __INRAM PageManager::Switch_Info_t PageManager::switchinfo = {0};
-void PageManager::TaskSwitchTo(void)
+__ALIGN(32) __USED __INRAM PageManager::Switch_Info_t PageManager::switchinfo = {0};
+void PageManager::TaskSwitchTo(void *pm)
 {
+		PageManager *PM = static_cast<PageManager*>(pm);
     BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
     while(1)
     {
-			extern PageManager manager;
         xReturn = xTaskNotifyWait(
 														0x0,
 														ULONG_MAX,
@@ -208,29 +208,26 @@ void PageManager::TaskSwitchTo(void)
 														portMAX_DELAY
 												);
         if(xReturn == pdPASS)
-					manager.SwitchTo(switchinfo.newNode, switchinfo.isEnterAct, switchinfo.stash);
+					PM->SwitchTo(switchinfo.newNode, switchinfo.isEnterAct, switchinfo.stash);
     }     
 } 
 
-void TaskSwitchTo_Wrapper(void)
-{
-	extern PageManager manager;
-	return manager.TaskSwitchTo();
-}
-
 void PageManager::TaskSwitchToCreate(void)
 {
-    
+    BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
     taskENTER_CRITICAL();           //进入临界区
     
 
         /* 创建TaskSwitchTo任务 */
-	xTaskCreate((TaskFunction_t )TaskSwitchTo_Wrapper, /* 任务入口函数 */
+		xReturn = xTaskCreate((TaskFunction_t )PageManager::TaskSwitchTo, /* 任务入口函数 */
                     (const char*    )"TaskSwitchTo",/* 任务名字 */
-                    (uint16_t       )0x800,   /* 任务栈大小 */
-                    (void*          )NULL,	/* 任务入口函数参数 */
+                    (uint16_t       )0x400,   /* 任务栈大小 */
+                    (void*          )this,	/* 任务入口函数参数 */
                     (UBaseType_t    )20,	    /* 任务的优先级 */
                     (TaskHandle_t*  )&TaskSwitchTo_Handle);/* 任务控制块指针 */
+		if(pdPASS == xReturn)
+				UDEBUG("创建TaskSwitchTo任务成功!\r\n");
+		else UDEBUG("创建TaskSwitchTo任务失败,错误代码:%d\r\n",(int)xReturn);
     
     taskEXIT_CRITICAL();
 }
@@ -268,7 +265,7 @@ bool PageManager::SwitchTo(PageBase* newNode, bool isEnterAct, const PageBase::S
 
         if (newNode->priv.Stash.ptr == NULL)
         {
-            buffer = lv_malloc(stash->size);
+            buffer = new uint8_t (stash->size);
             if (buffer == NULL)
             {
                 PM_LOG_ERROR("stash malloc failed");

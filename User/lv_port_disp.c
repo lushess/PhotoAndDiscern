@@ -22,7 +22,7 @@
 #define ONE_BUFFER 1
 #define TWO_BUFFER 0
 
-#define COLOR_SIZE         (240*400/10) //ÆÁÄ»µÄ1/10
+#define COLOR_SIZE         (24*400) //ÆÁÄ»µÄ1/10
 /**********************
  *      TYPEDEFS
  **********************/
@@ -49,11 +49,13 @@ static void lv_flush(void);
  *  STATIC VARIABLES
  **********************/
 static TaskHandle_t LV_Flush_Task_Handle = NULL;
-
+/**********************
+ *  GLOBAL VARIABLES
+ **********************/
+__ALIGN(4) __USED __EXRAM uint8_t lv_memory_pool[LV_MEM_SIZE] = {0};
 /**********************
  *      MACROS
  **********************/
-
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -91,8 +93,8 @@ void lv_port_disp_init(void)
      */
 
     /* Example for 1) */
-    static lv_disp_draw_buf_t draw_buf_dsc_1 __INRAM;
-    static lv_color_t buf_1[COLOR_SIZE] __INRAM;                          /*A buffer for 10 rows*/
+		__ALIGN(4) __INRAM static lv_disp_draw_buf_t draw_buf_dsc_1 ;
+    __ALIGN(4) __EXRAM static lv_color_t buf_1[COLOR_SIZE];                          /*A buffer for 10 rows*/
     lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, COLOR_SIZE);   /*Initialize the display buffer*/
 
     /* Example for 2) */
@@ -111,7 +113,7 @@ void lv_port_disp_init(void)
      * Register the display in LVGL
      *----------------------------------*/
 
-    static lv_disp_drv_t disp_drv __INRAM;                         /*Descriptor of a display driver*/
+		__INRAM static lv_disp_drv_t disp_drv ;                         /*Descriptor of a display driver*/
     lv_disp_drv_init(&disp_drv);                    /*Basic initialization*/
 
     /*Set up the functions to access to your display*/

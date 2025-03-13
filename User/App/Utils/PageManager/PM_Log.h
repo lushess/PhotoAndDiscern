@@ -28,7 +28,7 @@
 #ifdef USART_OUTPUT_DEBUG
 #include "usart.h"
 #  define _PM_LOG(format, ...)      UDEBUG("[PM]" format, ##__VA_ARGS__)
-#  define PM_LOG_INFO(format, ...)  //_PM_LOG("[Info] " format, ##__VA_ARGS__)
+#  define PM_LOG_INFO(format, ...)  _PM_LOG("[Info] " format, ##__VA_ARGS__)
 #  define PM_LOG_WARN(format, ...)  _PM_LOG("[Warn] " format, ##__VA_ARGS__)
 #  define PM_LOG_ERROR(format, ...) _PM_LOG("[Error] " format, ##__VA_ARGS__)
 #else

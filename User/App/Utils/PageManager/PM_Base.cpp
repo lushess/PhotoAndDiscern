@@ -51,7 +51,10 @@ PageManager::PageManager(PageFactory* factory)
   */
 PageManager::~PageManager()
 {
-    SetStackClear();   
+    SetStackClear(); 
+		if (TaskSwitchTo_Handle) {
+        vTaskDelete(TaskSwitchTo_Handle); // Í£Ö¹ÈÎÎñ
+    }  
 }
 
 /**
@@ -134,7 +137,10 @@ bool PageManager::Install(const char* className, const char* appName)
     memset(&base->priv, 0, sizeof(base->priv));
 
     PM_LOG_INFO("Install Page[class = %s, name = %s]", className, appName);
-    TaskSwitchToCreate();
+		PM_LOG_INFO("Page AddressBase:%p", base);
+		
+		if(TaskSwitchTo_Handle == nullptr) TaskSwitchToCreate();
+		
     bool retval = Register(base, appName);
 
     base->onCustomAttrConfig();

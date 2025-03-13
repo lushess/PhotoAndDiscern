@@ -49,7 +49,7 @@ Account::Account(
 
     if (bufSize != 0)
     {
-        uint8_t* buffer = (uint8_t*)lv_malloc(bufSize * sizeof(uint8_t) * 2);
+        uint8_t* buffer = new uint8_t (bufSize * sizeof(uint8_t) * 2);
 
         if (!buffer)
         {
@@ -84,7 +84,7 @@ Account::~Account()
     /* Release cache */
     if(priv.BufferSize)
     {
-        lv_free(priv.BufferManager.buffer[0]);
+        delete(priv.BufferManager.buffer[0]);
     }
 
     /* Delete timer */

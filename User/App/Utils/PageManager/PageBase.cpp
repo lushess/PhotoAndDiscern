@@ -67,7 +67,7 @@ bool PageBase::StashPop(void* ptr, uint32_t size)
     }
 
     memcpy(ptr, priv.Stash.ptr, priv.Stash.size);
-    lv_free(priv.Stash.ptr);
+    delete(priv.Stash.ptr);
     priv.Stash.ptr = nullptr;
     return false;
 }

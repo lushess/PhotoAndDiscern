@@ -38,8 +38,8 @@ static void* first_alloc(size_t size)
         lv_init();
     }
 
-    alloc_func = lv_malloc;
-    return lv_malloc(size);;
+    alloc_func = lv_mem_alloc;
+    return lv_mem_alloc(size);;
 }
 
 void *operator new(size_t size)
@@ -54,12 +54,12 @@ void *operator new[](size_t size)
 
 void operator delete(void* ptr)
 {
-    lv_free(ptr);
+    lv_mem_free(ptr);
 }
 
 void operator delete[](void* ptr)
 {
-    lv_free(ptr);
+    lv_mem_free(ptr);
 }
 
 #endif

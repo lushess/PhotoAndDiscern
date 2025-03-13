@@ -83,12 +83,6 @@
 //    #define SIZE_MAX    ( ( size_t ) -1 )
 //#endif
 
-//内存分配器
-//#ifdef USE_FREERTOS_MALLOCATOR
-//		#define Memalloc pvPortMalloc
-//		#define Memfree vPortFree
-//#endif //USE_FREERTOS_MALLOCATOR
-
 //断言
 #define vAssertCalled(char,int) //printf("Error:%s,%d\r\n",char,int)
 #define configASSERT(x) \
@@ -213,7 +207,7 @@ do{\
 //支持静态内存
 #define configSUPPORT_STATIC_ALLOCATION					0					
 //系统所有总的堆大小
-#define configTOTAL_HEAP_SIZE			FREERTOS_HEAP_SIZE_INRAM 
+#define configTOTAL_HEAP_SIZE			FREERTOS_HEAP_SIZE 
 
 /***************************************************************
              FreeRTOS与钩子函数有关的配置选项                                            
