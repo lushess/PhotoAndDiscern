@@ -36,8 +36,8 @@ do{ \
     DataProc::Center()->AccountMain.Notify(#ACT, &info, sizeof(info)); \
 }while(0)
 
-__INRAM static AppFactory factory;
-__INRAM static PageManager manager(&factory);
+__ALIGN(4) __USED __INRAM static AppFactory factory;
+__ALIGN(4) __USED __INRAM static PageManager manager(&factory);
 
 void App_Init()
 {
@@ -94,7 +94,7 @@ void App_Init()
 
     /* Initialize status bar */
    // Page::StatusBar_Create(lv_layer_top());
-
+	
     /* Initialize pages */
     manager.Install("Camera",      "Pages/Camera");
 		UDEBUG("Pages/Camera加载成功!!");
@@ -106,7 +106,7 @@ void App_Init()
 		UDEBUG("Pages/PicturePresent加载成功!!");
 
     manager.SetGlobalLoadAnimType(PageManager::LOAD_ANIM_OVER_TOP);
-
+		
     manager.Push("Pages/Startup");
 		UDEBUG("页面加载成功!!");
 }

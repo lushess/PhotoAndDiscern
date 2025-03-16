@@ -60,7 +60,7 @@ static int onEvent(Account* account, Account::EventParam_t* param)
             lv_fs_dir_close(&lv_dir);
         }
         // delete info->path;
-        // info->path = nullptr;
+        // info->path = NULL;
         info->data = dirfilename;
         info->size = filenum;
     }

@@ -17,7 +17,7 @@ void CameraModel::Deinit()
     if (account)
     {
         delete account;
-        account = nullptr;
+        account = NULL;
     }
 }
 

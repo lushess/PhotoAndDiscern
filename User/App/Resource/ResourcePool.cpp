@@ -20,7 +20,7 @@ do{\
     static void Resource_Init()
     {
         /* Import Fonts */
-       // IMPORT_FONT(startup);
+        IMPORT_FONT(startup);
         IMPORT_FONT(optlabel);
         IMPORT_FONT(discern);
         IMPORT_FONT(driopt);

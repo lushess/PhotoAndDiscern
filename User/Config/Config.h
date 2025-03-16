@@ -2,7 +2,7 @@
 #define __CONFIG_H
 
 /*=========================
-   Application configuration
+   Total configuration
  *=========================*/
 
 #define __EXRAM    __attribute__((section("EXRAM")))     
@@ -53,7 +53,7 @@
 		#if	FREERTOS_USE_EXRAM_ENABLE
 				#define FREERTOS_USE_EXRAM
 		#endif //FREERTOS_USE_EXRAM_ENABLE
-#define FREERTOS_HEAP_SIZE 	((size_t)(0x00008000))
+#define FREERTOS_HEAP_SIZE 	((size_t)(0x00010000))
 
 
 #endif //__CONFIG_H

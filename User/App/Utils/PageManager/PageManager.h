@@ -27,6 +27,7 @@
 #include "PageFactory.h"
 #include "FreeRTOS/inc/FreeRTOS.h"
 #include "FreeRTOS/inc/task.h"
+#include "FreeRTOS/inc/semphr.h"
 #include "Config/Config.h"
 #include <vector>
 #include <stack>
@@ -34,6 +35,8 @@
 class PageManager
 {
 public:
+		/* PageManager is Started Flag */
+		bool isPageManagerStarted;
 
     /* Page switching animation type  */
     typedef enum
@@ -107,10 +110,11 @@ public:
     /* For the TaskSwitchTo() to recieve param */
     typedef struct 
     {
-        PageBase* newNode;
-        bool isEnterAct;
+				int padding; //Pointer at the head will be covered by the structure address,set padding to shift the data
+			  bool isEnterAct; 
+        PageBase* newNode; 
         const PageBase::Stash_t* stash;
-    } Switch_Info_t;
+    }Switch_Info_t;
     
 public:
     PageManager(PageFactory* factory = NULL);
@@ -128,6 +132,9 @@ public:
     bool Pop();
     bool BackHome();
     const char* GetPagePrevName();
+		PageBase* GetPagePrevPointer();
+		PageBase* GetCurrentPagePointer();
+
 
     /* Global Animation */
     void SetGlobalLoadAnimType(
@@ -141,8 +148,9 @@ public:
         _RootDefaultStyle = style;
     }
     
-    bool SwitchTo(PageBase* base, bool isEnterAct, const PageBase::Stash_t* stash = NULL);
+		/* Page Switcher */
 		static void TaskSwitchTo(void *pm);
+		
 private:
     /* Page Pool */
     PageBase* FindPageInPool(const char* name);
@@ -188,6 +196,7 @@ private:
     void SwitchAnimTypeUpdate(PageBase* base);
     bool SwitchReqCheck();
     bool SwitchAnimStateCheck();
+		bool SwitchTo(PageBase* base, bool isEnterAct, const PageBase::Stash_t* stash = NULL);
 
     /* State */
     PageBase::State_t StateLoadExecute(PageBase* base);
@@ -232,10 +241,15 @@ private:
 
     /* Root style */
     lv_style_t* _RootDefaultStyle;
+		
+		/* SwitchToTask Handle*/
+    TaskHandle_t TaskSwitchTo_Handle = NULL;
 
-    TaskHandle_t TaskSwitchTo_Handle = nullptr;
-
-    static Switch_Info_t switchinfo;
+		/* PageManager::SwitchTo paramStruct */
+    Switch_Info_t switchinfo;
+		
+		/* SwitchToTask mutex */
+		SemaphoreHandle_t swMutex; // ÉùÃ÷»¥³âÁ¿
 
 };
 

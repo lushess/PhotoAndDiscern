@@ -55,12 +55,12 @@ void MemStoreView::Delete()
     if(ui.anim_timeline)
     {
         lv_anim_timeline_del(ui.anim_timeline);
-        ui.anim_timeline = nullptr;
+        ui.anim_timeline = NULL;
     }
     if(ui.dri.dri_anim)
     {
         lv_anim_timeline_del(ui.dri.dri_anim);
-        ui.dri.dri_anim = nullptr;
+        ui.dri.dri_anim = NULL;
     }
 }
 

@@ -86,7 +86,7 @@ Account* DataCenter::Find(Account::AccountVector_t* vec, const char* id)
             return iter;
         }
     }
-    return nullptr;
+    return NULL;
 }
 
 /**
@@ -101,7 +101,7 @@ bool DataCenter::AddAccount(Account* account)
         return false;
     }
 
-    if (SearchAccount(account->ID) != nullptr)
+    if (SearchAccount(account->ID) != NULL)
     {
         DC_LOG_ERROR("Multi add Account[%s]", account->ID);
         return false;

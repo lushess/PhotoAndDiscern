@@ -194,7 +194,7 @@ bool PageManager::Pop()
     );
 }
 
-__ALIGN(32) __USED __INRAM PageManager::Switch_Info_t PageManager::switchinfo = {0};
+//__ALIGN(4) __USED __INRAM PageManager::Switch_Info_t PageManager::switchinfo = {NULL};
 void PageManager::TaskSwitchTo(void *pm)
 {
 		PageManager *PM = static_cast<PageManager*>(pm);
@@ -202,13 +202,13 @@ void PageManager::TaskSwitchTo(void *pm)
     while(1)
     {
         xReturn = xTaskNotifyWait(
-														0x0,
 														ULONG_MAX,
-														(uint32_t *)&switchinfo,
+														ULONG_MAX,
+														(uint32_t *)&PM->switchinfo,
 														portMAX_DELAY
 												);
         if(xReturn == pdPASS)
-					PM->SwitchTo(switchinfo.newNode, switchinfo.isEnterAct, switchinfo.stash);
+					PM->SwitchTo(PM->switchinfo.newNode, PM->switchinfo.isEnterAct, PM->switchinfo.stash);
     }     
 } 
 
@@ -241,6 +241,8 @@ void PageManager::TaskSwitchToCreate(void)
   */
 bool PageManager::SwitchTo(PageBase* newNode, bool isEnterAct, const PageBase::Stash_t* stash)
 {
+		xSemaphoreTake(swMutex,portMAX_DELAY);
+	
     if (newNode == NULL)
     {
         PM_LOG_ERROR("newNode is NULL");
@@ -340,6 +342,8 @@ bool PageManager::SwitchTo(PageBase* newNode, bool isEnterAct, const PageBase::S
         lv_obj_move_foreground(_PageCurrent->_root);
         if (_PagePrev)lv_obj_move_foreground(_PagePrev->_root);
     }
+		
+		xSemaphoreGive(swMutex);
     return true;
 }
 

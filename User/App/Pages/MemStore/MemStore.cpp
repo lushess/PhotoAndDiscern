@@ -47,8 +47,8 @@ do\
 #define COLOR_GRAY      lv_color_hex(0x808080)
 
 MemStore::MemStore()
-    : timer(nullptr),
-      lastFocus(nullptr),
+    : timer(NULL),
+      lastFocus(NULL),
       listchanged(true)            
 {
     currentpath = new char[128];

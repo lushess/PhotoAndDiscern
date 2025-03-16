@@ -14,7 +14,7 @@ void StartupModel::Deinit()
     if (account)
     {
         delete account;
-        account = nullptr;
+        account = NULL;
     }
 }
 

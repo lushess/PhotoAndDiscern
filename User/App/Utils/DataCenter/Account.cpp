@@ -124,23 +124,23 @@ Account* Account::Subscribe(const char* pubID)
     if (strcmp(pubID, ID) == 0)
     {
         DC_LOG_ERROR("Account[%s] try to subscribe to it itself", ID);
-        return nullptr;
+        return NULL;
     }
 
     /* Whether to subscribe repeatedly */
     Account* pub = Center->Find(&publishers, pubID);
-    if(pub != nullptr)
+    if(pub != NULL)
     {
         DC_LOG_ERROR("Multi subscribe pub[%s]", pubID);
-        return nullptr;
+        return NULL;
     }
 
     /* BWhether the account is created */
     pub = Center->SearchAccount(pubID);
-    if (pub == nullptr)
+    if (pub == NULL)
     {
         DC_LOG_ERROR("pub[%s] was not found", pubID);
-        return nullptr;
+        return NULL;
     }
 
     /* Add the publisher to the subscription list */
@@ -163,7 +163,7 @@ bool Account::Unsubscribe(const char* pubID)
 {
     /* Whether to subscribe to the publisher */
     Account* pub = Center->Find(&publishers, pubID);
-    if (pub == nullptr)
+    if (pub == NULL)
     {
         DC_LOG_WARN("sub[%s] was not subscribe pub[%s]", ID, pubID);
         return false;
@@ -230,7 +230,7 @@ int Account::Publish()
     EventParam_t param;
     param.event = EVENT_PUB_PUBLISH;
     param.tran = this;
-    param.recv = nullptr;
+    param.recv = NULL;
     param.data_p = rBuf;
     param.size = priv.BufferSize;
 
@@ -243,7 +243,7 @@ int Account::Publish()
         DC_LOG_INFO("pub[%s] publish >> data(0x%p)[%d] >> sub[%s]...",
                     ID, param.data_p, param.size, sub->ID);
 
-        if (callback != nullptr)
+        if (callback != NULL)
         {
             param.recv = sub;
             int ret = callback(sub, &param);
@@ -274,7 +274,7 @@ int Account::Publish()
 int Account::Pull(const char* pubID, void* data_p, uint32_t size)
 {
     Account* pub = Center->Find(&publishers, pubID);
-    if (pub == nullptr)
+    if (pub == NULL)
     {
         DC_LOG_ERROR("sub[%s] was not subscribe pub[%s]", ID, pubID);
         return RES_NOT_FOUND;
@@ -286,7 +286,7 @@ int Account::Pull(Account* pub, void* data_p, uint32_t size)
 {
     int retval = RES_UNKNOW;
 
-    if (pub == nullptr)
+    if (pub == NULL)
     {
         return RES_NOT_FOUND;
     }
@@ -295,7 +295,7 @@ int Account::Pull(Account* pub, void* data_p, uint32_t size)
                 ID, data_p, size, pub->ID);
 
     EventCallback_t callback = pub->priv.eventCallback;
-    if (callback != nullptr)
+    if (callback != NULL)
     {
         EventParam_t param;
         param.event = EVENT_SUB_PULL;
@@ -355,7 +355,7 @@ int Account::Pull(Account* pub, void* data_p, uint32_t size)
 int Account::Notify(const char* pubID, const void* data_p, uint32_t size)
 {
     Account* pub = Center->Find(&publishers, pubID);
-    if (pub == nullptr)
+    if (pub == NULL)
     {
         DC_LOG_ERROR("sub[%s] was not subscribe pub[%s]", ID, pubID);
         return RES_NOT_FOUND;
@@ -374,7 +374,7 @@ int Account::Notify(Account* pub, const void* data_p, uint32_t size)
 {
     int retval = RES_UNKNOW;
 
-    if (pub == nullptr)
+    if (pub == NULL)
     {
         return RES_NOT_FOUND;
     }
@@ -383,7 +383,7 @@ int Account::Notify(Account* pub, const void* data_p, uint32_t size)
                 ID, data_p, size, pub->ID);
 
     EventCallback_t callback = pub->priv.eventCallback;
-    if (callback != nullptr)
+    if (callback != NULL)
     {
         EventParam_t param;
         param.event = EVENT_NOTIFY;
@@ -431,7 +431,7 @@ void Account::TimerCallbackHandler(lv_timer_t* timer)
         param.event = EVENT_TIMER;
         param.tran = instance;
         param.recv = instance;
-        param.data_p = nullptr;
+        param.data_p = NULL;
         param.size = 0;
 
         callback(instance, &param);
@@ -448,7 +448,7 @@ void Account::SetTimerPeriod(uint32_t period)
     if(priv.timer)
     {
         lv_timer_del(priv.timer);
-        priv.timer = nullptr;
+        priv.timer = NULL;
     }
 
     if(period == 0)
@@ -472,7 +472,7 @@ void Account::SetTimerEnable(bool en)
 {
     lv_timer_t* timer = priv.timer;
 
-    if (timer == nullptr)
+    if (timer == NULL)
     {
         return;
     }

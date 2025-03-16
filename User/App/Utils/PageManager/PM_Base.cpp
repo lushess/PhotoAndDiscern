@@ -26,6 +26,12 @@
 
 #define PM_EMPTY_PAGE_NAME "EMPTY_PAGE"
 
+PageBase::PageBase()
+			:_root(NULL)
+{}
+PageBase::~PageBase()
+{}
+	
 /**
   * @brief  Page manager constructor
   * @param  factory: Pointer to the page factory
@@ -33,15 +39,18 @@
   */
 PageManager::PageManager(PageFactory* factory)
     : _Factory(factory)
-    , _PagePrev(nullptr)
-    , _PageCurrent(nullptr)
-    , _RootDefaultStyle(nullptr)
+    , _PagePrev(NULL)
+    , _PageCurrent(NULL)
+    , _RootDefaultStyle(NULL)
+		, swMutex(xSemaphoreCreateMutex())
+		, isPageManagerStarted(false)
     
 {
     memset(&_AnimState, 0, sizeof(_AnimState));
     memset(&switchinfo,NULL,sizeof(switchinfo));
 
     SetGlobalLoadAnimType();
+		if(TaskSwitchTo_Handle == NULL) TaskSwitchToCreate();//Create Page Switch Task
 }
 
 /**
@@ -53,14 +62,16 @@ PageManager::~PageManager()
 {
     SetStackClear(); 
 		if (TaskSwitchTo_Handle) {
-        vTaskDelete(TaskSwitchTo_Handle); // Í£Ö¹ÈÎÎñ
-    }  
+        vTaskDelete(TaskSwitchTo_Handle); //Delete Page Switch Task
+				TaskSwitchTo_Handle = NULL;
+    }
+		vSemaphoreDelete(swMutex);
 }
 
 /**
   * @brief  Search pages in the page pool
   * @param  name: Page name
-  * @retval A pointer to the base class of the page, or nullptr if not found
+  * @retval A pointer to the base class of the page, or NULL if not found
   */
 PageBase* PageManager::FindPageInPool(const char* name)
 {
@@ -71,13 +82,13 @@ PageBase* PageManager::FindPageInPool(const char* name)
             return iter;
         }
     }
-    return nullptr;
+    return NULL;
 }
 
 /**
   * @brief  Search pages in the page stack
   * @param  name: Page name
-  * @retval A pointer to the base class of the page, or nullptr if not found
+  * @retval A pointer to the base class of the page, or NULL if not found
   */
 PageBase* PageManager::FindPageInStack(const char* name)
 {
@@ -94,7 +105,7 @@ PageBase* PageManager::FindPageInStack(const char* name)
         stk.pop();
     }
 
-    return nullptr;
+    return NULL;
 }
 
 /**
@@ -105,41 +116,39 @@ PageBase* PageManager::FindPageInStack(const char* name)
   */
 bool PageManager::Install(const char* className, const char* appName)
 {
-    if (_Factory == nullptr)
+    if (_Factory == NULL)
     {
         PM_LOG_ERROR("Factory was not registered, can't install page");
         return false;
     }
 
-    if (appName == nullptr)
+    if (appName == NULL)
     {
         PM_LOG_WARN("appName has not set");
         appName = className;
     }
 
-    if (FindPageInPool(appName) != nullptr)
+    if (FindPageInPool(appName) != NULL)
     {
         PM_LOG_ERROR("Page(%s) was registered", appName);
         return false;
     }
 
     PageBase* base = _Factory->CreatePage(className);
-    if (base == nullptr)
+    if (base == NULL)
     {
         PM_LOG_ERROR("Factory has not %s", className);
         return false;
     }
 
-    base->_root = nullptr;
+    base->_root = NULL;
     base->_ID = 0;
-    base->_Manager = nullptr;
-    base->_UserData = nullptr;
+    base->_Manager = NULL;
+    base->_UserData = NULL;
     memset(&base->priv, 0, sizeof(base->priv));
 
     PM_LOG_INFO("Install Page[class = %s, name = %s]", className, appName);
 		PM_LOG_INFO("Page AddressBase:%p", base);
-		
-		if(TaskSwitchTo_Handle == nullptr) TaskSwitchToCreate();
 		
     bool retval = Register(base, appName);
 
@@ -160,7 +169,7 @@ bool PageManager::Uninstall(const char* appName)
     vTaskDelete(TaskSwitchTo_Handle);
 
     PageBase* base = FindPageInPool(appName);
-    if (base == nullptr)
+    if (base == NULL)
     {
         PM_LOG_ERROR("Page(%s) was not found", appName);
         return false;
@@ -195,7 +204,7 @@ bool PageManager::Uninstall(const char* appName)
   */
 bool PageManager::Register(PageBase* base, const char* name)
 {
-    if (FindPageInPool(name) != nullptr)
+    if (FindPageInPool(name) != NULL)
     {
         PM_LOG_ERROR("Page(%s) was multi registered", name);
         return false;
@@ -220,14 +229,14 @@ bool PageManager::Unregister(const char* name)
 
     PageBase* base = FindPageInStack(name);
 
-    if (base != nullptr)
+    if (base != NULL)
     {
         PM_LOG_ERROR("Page(%s) was in stack", name);
         return false;
     }
 
     base = FindPageInPool(name);
-    if (base == nullptr)
+    if (base == NULL)
     {
         PM_LOG_ERROR("Page(%s) was not found", name);
         return false;
@@ -254,7 +263,7 @@ bool PageManager::Unregister(const char* name)
   */
 PageBase* PageManager::GetStackTop()
 {
-    return _PageStack.empty() ? nullptr : _PageStack.top();
+    return _PageStack.empty() ? NULL : _PageStack.top();
 }
 
 /**
@@ -266,9 +275,9 @@ PageBase* PageManager::GetStackTopAfter()
 {
     PageBase* top = GetStackTop();
 
-    if (top == nullptr)
+    if (top == NULL)
     {
-        return nullptr;
+        return NULL;
     }
 
     _PageStack.pop();
@@ -291,7 +300,7 @@ void PageManager::SetStackClear(bool keepBottom)
     {
         PageBase* top = GetStackTop();
 
-        if (top == nullptr)
+        if (top == NULL)
         {
             PM_LOG_INFO("Page stack is empty, breaking...");
             break;
@@ -299,7 +308,7 @@ void PageManager::SetStackClear(bool keepBottom)
 
         PageBase* topAfter = GetStackTopAfter();
 
-        if (topAfter == nullptr)
+        if (topAfter == NULL)
         {
             if (keepBottom)
             {
@@ -309,7 +318,7 @@ void PageManager::SetStackClear(bool keepBottom)
             }
             else
             {
-                _PagePrev = nullptr;
+                _PagePrev = NULL;
             }
         }
 
@@ -329,3 +338,24 @@ const char* PageManager::GetPagePrevName()
 {
     return _PagePrev ? _PagePrev->_Name : PM_EMPTY_PAGE_NAME;
 }
+
+/**
+  * @brief  Get the pointer of the previous page
+  * @param  None
+  * @retval The pointer of the previous page, if it does not exist, return NULL
+  */
+PageBase* PageManager::GetPagePrevPointer()
+{
+    return _PagePrev;
+}
+
+/**
+  * @brief  Get the pointer of the current page
+  * @param  None
+  * @retval The pointer of the current page, if it does not exist, return NULL
+  */
+PageBase* PageManager::GetCurrentPagePointer()
+{
+    return _PageCurrent;
+}
+

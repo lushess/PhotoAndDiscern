@@ -24,14 +24,15 @@
 #include <algorithm>
 #include <string.h>
 #include "lvgl/lvgl.h"
+#include "usart.h"
 
-#define RES_LOG_INFO  LV_LOG_INFO
-#define RES_LOG_WARN  LV_LOG_WARN
-#define RES_LOG_ERROR LV_LOG_ERROR
+#define RES_LOG_INFO  UDEBUG
+#define RES_LOG_WARN  UDEBUG
+#define RES_LOG_ERROR UDEBUG
 
 ResourceManager::ResourceManager()
 {
-    DefaultPtr = nullptr;
+    DefaultPtr = NULL;
 }
 
 ResourceManager::~ResourceManager()

@@ -99,7 +99,8 @@ public:
     } priv;
 
 public:
-    virtual ~PageBase() {}
+		PageBase();
+    virtual ~PageBase();
 
     /* Synchronize user-defined attribute configuration */
     virtual void onCustomAttrConfig() {}

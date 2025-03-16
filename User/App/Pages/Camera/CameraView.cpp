@@ -109,12 +109,12 @@ void CameraView::Delete()
     if(ui.anim_timeline)
     {
         lv_anim_timeline_del(ui.anim_timeline);
-        ui.anim_timeline = nullptr;
+        ui.anim_timeline = NULL;
     }
     if(ui.optlabel.label_anim)
     {
         lv_anim_timeline_del(ui.optlabel.label_anim);
-        ui.optlabel.label_anim = nullptr;
+        ui.optlabel.label_anim = NULL;
     }
 }
 

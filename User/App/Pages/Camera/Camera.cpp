@@ -4,8 +4,8 @@
 using namespace Page;
 
 Camera::Camera()
-    : beeptimer(nullptr)
-    , lastFocus(nullptr)
+    : beeptimer(NULL)
+    , lastFocus(NULL)
     
 {
 }

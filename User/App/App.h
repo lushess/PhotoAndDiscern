@@ -27,7 +27,6 @@
 void App_Init_Wrapper(void);
 void App_Uninit_Wrapper(void);
 
-
 void App_Init(void);
 void App_Uninit(void);
 

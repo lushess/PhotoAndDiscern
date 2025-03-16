@@ -30,7 +30,7 @@
   */
 void PageManager::StateUpdate(PageBase* base)
 {
-    if (base == nullptr)
+    if (base == NULL)
         return;
 
     switch (base->priv.State)
@@ -90,9 +90,9 @@ PageBase::State_t PageManager::StateLoadExecute(PageBase* base)
 {
     PM_LOG_INFO("Page(%s) state load", base->_Name);
 
-    if (base->_root != nullptr)
+    if (base->_root != NULL)
     {
-        PM_LOG_ERROR("Page(%s) root must be nullptr", base->_Name);
+        PM_LOG_ERROR("Page(%s) root must be NULL", base->_Name);
     }
 
     lv_obj_t* root_obj = lv_obj_create(lv_scr_act());
@@ -112,7 +112,7 @@ PageBase::State_t PageManager::StateLoadExecute(PageBase* base)
     {
         PageBase* bottomPage = GetStackTopAfter();
 
-        if (bottomPage != nullptr && bottomPage->priv.IsCached)
+        if (bottomPage != NULL && bottomPage->priv.IsCached)
         {
             LoadAnimAttr_t animAttr;
             if (GetCurrentLoadAnimAttr(&animAttr))
@@ -209,24 +209,24 @@ PageBase::State_t PageManager::StateDidDisappearExecute(PageBase* base)
 PageBase::State_t PageManager::StateUnloadExecute(PageBase* base)
 {
     PM_LOG_INFO("Page(%s) state unload", base->_Name);
-    if (base->_root == nullptr)
+    if (base->_root == NULL)
     {
         PM_LOG_WARN("Page is loaded!");
         goto Exit;
     }
 
     base->onViewUnload();
-    if (base->priv.Stash.ptr != nullptr && base->priv.Stash.size != 0)
+    if (base->priv.Stash.ptr != NULL && base->priv.Stash.size != 0)
     {
         PM_LOG_INFO("Page(%s) free stash(0x%p)[%d]", base->_Name, base->priv.Stash.ptr, base->priv.Stash.size);
         delete(base->priv.Stash.ptr);
-        base->priv.Stash.ptr = nullptr;
+        base->priv.Stash.ptr = NULL;
         base->priv.Stash.size = 0;
     }
 
     /* Delete after the end of the root animation life cycle */
     lv_obj_del_async(base->_root);
-    base->_root = nullptr;
+    base->_root = NULL;
     base->priv.IsCached = false;
     base->onViewDidUnload();
 

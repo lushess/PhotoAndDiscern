@@ -35,7 +35,7 @@
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
           <SFDFile>$$Device:STM32F103ZE$SVD\STM32F103xx.svd</SFDFile>
-          <bCustSvd>0</bCustSvd>
+          <bCustSvd>1</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
           <IncludePath></IncludePath>
@@ -2264,11 +2264,6 @@
               <FilePath>.\User\App\Resource\Font\font_optlabel.c</FilePath>
             </File>
             <File>
-              <FileName>font_startup.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\User\App\Resource\Font\font_startup.c</FilePath>
-            </File>
-            <File>
               <FileName>font_ta.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\User\App\Resource\Font\font_ta.c</FilePath>
@@ -2277,6 +2272,11 @@
               <FileName>font_volume.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\User\App\Resource\Font\font_volume.c</FilePath>
+            </File>
+            <File>
+              <FileName>font_startup.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\App\Resource\Font\font_startup.c</FilePath>
             </File>
           </Files>
         </Group>

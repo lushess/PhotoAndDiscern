@@ -49,7 +49,7 @@ void PageBase::SetCustomLoadAnimType(
 
 bool PageBase::StashPop(void* ptr, uint32_t size)
 {
-    if (priv.Stash.ptr == nullptr)
+    if (priv.Stash.ptr == NULL)
     {
         PM_LOG_WARN("No Stash found");
         return false;
@@ -68,7 +68,7 @@ bool PageBase::StashPop(void* ptr, uint32_t size)
 
     memcpy(ptr, priv.Stash.ptr, priv.Stash.size);
     delete(priv.Stash.ptr);
-    priv.Stash.ptr = nullptr;
-    return false;
+    priv.Stash.ptr = NULL;
+    return true;
 }
 

@@ -19,22 +19,17 @@
 /*********************
  *      DEFINES
  *********************/
-#define ONE_BUFFER 1
-#define TWO_BUFFER 0
+#define ONE_BUFFER 0
+#define TWO_BUFFER 1
 
-#define COLOR_SIZE         (24*400) //ÆÁÄ»µÄ1/10
+#define SCREEN_WIDTH 240
+#define BUFFER_HEIGHT 40
+#define COLOR_SIZE (SCREEN_WIDTH * BUFFER_HEIGHT)
 /**********************
  *      TYPEDEFS
  **********************/
 lv_disp_drv_t* pdisp_drv = NULL;
-uint8_t nDMA = NULL;
-typedef struct
-{
-	uint16_t *pcolor;
-	uint32_t ntw;		
-} flushinfo_t;
 
-flushinfo_t flushinfo;
 /**********************
  *  STATIC PROTOTYPES
  **********************/
@@ -93,15 +88,15 @@ void lv_port_disp_init(void)
      */
 
     /* Example for 1) */
-		__ALIGN(4) __INRAM static lv_disp_draw_buf_t draw_buf_dsc_1 ;
-    __ALIGN(4) __EXRAM static lv_color_t buf_1[COLOR_SIZE];                          /*A buffer for 10 rows*/
-    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, COLOR_SIZE);   /*Initialize the display buffer*/
+//		__ALIGN(4) __INRAM static lv_disp_draw_buf_t draw_buf_dsc_1 ;
+//    __ALIGN(4) __INRAM static lv_color_t buf_1[COLOR_SIZE];                          /*A buffer for 10 rows*/
+//    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, COLOR_SIZE);   /*Initialize the display buffer*/
 
     /* Example for 2) */
-    //static lv_disp_draw_buf_t draw_buf_dsc_2;
-    //static lv_color_t buf_2_1[MY_DISP_HOR_RES * 10];                        /*A buffer for 10 rows*/
-    //static lv_color_t buf_2_2[MY_DISP_HOR_RES * 10];                        /*An other buffer for 10 rows*/
-    //lv_disp_draw_buf_init(&draw_buf_dsc_2, buf_2_1, buf_2_2, MY_DISP_HOR_RES * 10);   /*Initialize the display buffer*/
+    __ALIGN(4) __INRAM static lv_disp_draw_buf_t draw_buf_dsc_2;
+    __ALIGN(4) __INRAM static lv_color_t buf_1[COLOR_SIZE];                        /*A buffer for 10 rows*/
+    __ALIGN(4) __INRAM static lv_color_t buf_2[COLOR_SIZE];                       /*An other buffer for 10 rows*/
+    lv_disp_draw_buf_init(&draw_buf_dsc_2, buf_1, buf_2, COLOR_SIZE);   /*Initialize the display buffer*/
 
     /* Example for 3) also set disp_drv.full_refresh = 1 below*/
     //static lv_disp_draw_buf_t draw_buf_dsc_3;
@@ -126,7 +121,7 @@ void lv_port_disp_init(void)
     disp_drv.flush_cb = disp_flush;
 
     /*Set a display buffer*/
-    disp_drv.draw_buf = &draw_buf_dsc_1;
+    disp_drv.draw_buf = &draw_buf_dsc_2;
 
     /*Required for Example 3)*/
     //disp_drv.full_refresh = 1
@@ -172,6 +167,7 @@ static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
 	uint32_t height;
 
 //	LCD_Fill_ColorBuf(area->x1, area->y1, area->x2, area->y2, (uint16_t*)color_p);
+//		lv_disp_flush_ready(disp_drv);
 	LCD_Set_Window(area->x1,area->y1,area->x2,area->y2);
 	width = area->x2 - area->x1 + 1;
 	height = area->y2 - area->y1 + 1;
@@ -180,7 +176,6 @@ static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
     /*IMPORTANT!!!
      *Inform the graphics library that you are ready with the flushing*/
     //see @stm32f10x_it.c
-//		lv_disp_flush_ready(disp_drv);
 }
 
 void DMA2_Channel4_5_IRQHandler(void)
