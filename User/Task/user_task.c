@@ -269,20 +269,20 @@ void discern(void)//识别
 //					MedianFilter(image);                   //灰度图中值滤波
 				}
 				ShowGrayToLCD(image);                  //打印灰度图到LCD屏
-				GrayEven(image); 											//灰度图均匀化
+//				GrayEven(image); 											//灰度图均匀化
 				GrayToBinary(image);                    //灰度图转化为二值图 
-		//		MedianfilterCout=3;
-		//		while(MedianfilterCout--)
-		//		{
-		//			image=Tmpimage;
-		//			MedianFilter(image);                   //二值图中值滤波
-		//		}		
-		//		MedianfilterCout=3;
-		//		while(MedianfilterCout--)
-		//		{
-		//			image=Tmpimage;
-		//			CloseOperation(image);                 //开运算                 
-		//		}		
+//				MedianfilterCout=3;
+//				while(MedianfilterCout--)
+//				{
+//					image=Tmpimage;
+//					MedianFilter(image);                   //二值图中值滤波
+//				}		
+//				MedianfilterCout=3;
+//				while(MedianfilterCout--)
+//				{
+//					image=Tmpimage;
+//					CloseOperation(image);                 //开运算                 
+//				}		
 
 				ShowBinaryToLCD(image);               //把二值图打印到LCD屏
 //        lv_bar_set_value(bar,80,LV_ANIM_ON);

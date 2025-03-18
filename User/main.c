@@ -235,10 +235,7 @@ int main()
 
   LCD_Display_Dir(0);
 	LCD_Clear(BLACK);	
-	LCD_ShowFont12Char(10, 10, "普中科技");
-	LCD_ShowFont12Char(10, 30, "www.prechin.net");    
-	LCD_ShowFont12Char(10, 50, "摄像头应用--OV7670");
-	
+
 	GPIOF_Pin0_5_BeUsedFor_OV7670();
 	while(OV7670_Init()&&i!=0xff)i++;
 	i=OV7670_Init();
