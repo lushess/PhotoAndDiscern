@@ -35,9 +35,7 @@
 class PageManager
 {
 public:
-		/* PageManager is Started Flag */
-		bool isPageManagerStarted;
-
+	
     /* Page switching animation type  */
     typedef enum
     {
@@ -72,6 +70,15 @@ public:
         ROOT_DRAG_DIR_HOR,
         ROOT_DRAG_DIR_VER,
     } RootDragDir_t;
+		
+		/* Page Switch Action*/
+    typedef enum
+    {
+        SWITCH_ACTION_REPLACE = 1,
+        SWITCH_ACTION_PUSH,
+        SWITCH_ACTION_POP,
+				SWITCH_ACTION_BACKHOME
+    } SwAction_t;
 
     /* Animated setter */
     typedef void(*lv_anim_setter_t)(void*, int32_t);
@@ -110,7 +117,7 @@ public:
     /* For the TaskSwitchTo() to recieve param */
     typedef struct 
     {
-				int padding; //Pointer at the head will be covered by the structure address,set padding to shift the data
+//				int padding; //Pointer at the head will be covered by the structure address,set padding to shift the data
 			  bool isEnterAct; 
         PageBase* newNode; 
         const PageBase::Stash_t* stash;
@@ -249,7 +256,10 @@ private:
     Switch_Info_t switchinfo;
 		
 		/* SwitchToTask mutex */
-		SemaphoreHandle_t swMutex; // ÉùÃ÷»¥³âÁ¿
+		SemaphoreHandle_t swMutex; 
+		
+		/* SwitchInfo Queue */
+		QueueHandle_t swQueue;  //Handle
 
 };
 

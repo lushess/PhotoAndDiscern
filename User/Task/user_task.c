@@ -212,7 +212,7 @@ void discern(void)//识别
   lv_obj_align_to(label,bar,LV_ALIGN_OUT_TOP_LEFT,0,-4);
   lv_obj_set_style_text_font(label,&font_discern,0);
   lv_obj_set_style_text_color(label,lv_color_hex(0x804040),0);
-  lv_label_set_text(label,"正在识别...");
+  lv_label_set_text(label,"姝ｅ湪璇嗗埆...");
   lv_obj_set_style_opa(label,LV_OPA_0,0);
 	lv_obj_refresh_style(label,0,LV_STYLE_BG_OPA);//刷新样式
 	

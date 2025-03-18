@@ -57,7 +57,10 @@ MemStore::MemStore()
 
 MemStore::~MemStore()
 {
-
+		if(currentpath) {
+		delete currentpath;
+		currentpath = NULL;
+		}
 }
 
 void MemStore::onCustomAttrConfig()

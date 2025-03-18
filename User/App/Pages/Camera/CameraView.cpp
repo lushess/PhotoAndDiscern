@@ -18,6 +18,7 @@ void CameraView::Create(lv_obj_t* root)
     ShutterCreat(root);
     OptlabelCreat(root);
     StorebtnCreat(root);
+		ui.anim_timeline = lv_anim_timeline_create();
 }
 
 void CameraView::ShutterCreat(lv_obj_t* par)
@@ -34,8 +35,8 @@ void CameraView::ShutterCreat(lv_obj_t* par)
     ui.shutter.shutterex = shutterex;
 
     lv_obj_t* shutterin = lv_obj_create(shutterex);
-    lv_obj_set_size(shutterex,36, 36);
-    lv_obj_set_style_radius(shutterex,18,0);  //设置圆角长，取一半则为圆
+    lv_obj_set_size(shutterin,36, 36);
+    lv_obj_set_style_radius(shutterin,18,0);  //设置圆角长，取一半则为圆
     lv_obj_set_style_border_color(shutterin,COLOR_PURPLE,0);
     lv_obj_set_style_border_width(shutterin,2,0);
     lv_obj_align_to(shutterin,shutterex,LV_ALIGN_CENTER,0,0);
@@ -67,7 +68,7 @@ void CameraView::OptlabelCreat(lv_obj_t* par)
     lv_obj_set_size(ean13,30,14);
     lv_obj_set_style_text_font(ean13, ResourcePool::GetFont("optlabel"), 0);
     lv_obj_set_style_text_color(ean13,lv_color_white(),0);
-    lv_label_set_text(ean13,"条形码");
+    lv_label_set_text(ean13,"瀛楃");
     lv_obj_align_to(ean13,cont,LV_ALIGN_TOP_MID,0,1);
     ui.optlabel.ean13=ean13;
    
@@ -75,7 +76,7 @@ void CameraView::OptlabelCreat(lv_obj_t* par)
     lv_obj_set_size(chara,30,14);
     lv_obj_set_style_text_font(chara, ResourcePool::GetFont("optlabel"), 0);
     lv_obj_set_style_text_color(chara,lv_color_white(),0);
-    lv_label_set_text(chara,"字符");
+    lv_label_set_text(chara,"瀛楃");
     lv_obj_align_to(chara,cont,LV_ALIGN_BOTTOM_MID,0,-1);
     ui.optlabel.chara=chara;
 
@@ -98,6 +99,7 @@ void CameraView::StorebtnCreat(lv_obj_t* par)
     ui.storebtn.btn = btn;
 
     lv_obj_t* icon = lv_label_create(btn);
+		lv_obj_set_size(icon,22,22);
     lv_label_set_text(icon,LV_SYMBOL_LIST);
     lv_obj_set_style_text_color(icon,lv_color_white(),0);
     lv_obj_align_to(icon,btn,LV_ALIGN_CENTER,0,0);

@@ -80,15 +80,18 @@ bool PageManager::Replace(const char* name, const PageBase::Stash_t* stash)
     PM_LOG_INFO("Page(%s) replace Page(%s) (stash = 0x%p)", name, top->_Name, stash);
 
     /* Page switching execution */
-    //return SwitchTo(base, true, stash);
-    switchinfo.newNode = base;
-    switchinfo.isEnterAct = true;
-    switchinfo.stash = stash;
-    xTaskNotify(
-        TaskSwitchTo_Handle,
-        (uint32_t)&switchinfo,
-        eSetValueWithOverwrite
-    );
+		#if Test_PageManagerRouter_FREERTOS_Notify
+			switchinfo.newNode = base;
+			switchinfo.isEnterAct = true;
+			switchinfo.stash = stash;
+			xTaskNotify(
+					TaskSwitchTo_Handle,
+					(uint32_t)SWITCH_ACTION_REPLACE,
+					eSetBits
+			);
+		#else
+			return SwitchTo(base, true, stash);
+		#endif //Test_PageManagerRouter_FREERTOS_Notify
 }
 
 /**
@@ -131,16 +134,18 @@ bool PageManager::Push(const char* name, const PageBase::Stash_t* stash)
     PM_LOG_INFO("Page(%s) push >> [Screen] (stash = 0x%p)", name, stash);
 
     /* Page switching execution */
-    //return SwitchTo(base, true, stash);
-    switchinfo.newNode = base;
-    switchinfo.isEnterAct = true;
-    switchinfo.stash = stash;
-
-    xTaskNotify(
-        TaskSwitchTo_Handle,
-        (uint32_t)&switchinfo,
-        eSetValueWithOverwrite
-    );
+		#if Test_PageManagerRouter_FREERTOS_Notify
+			switchinfo.newNode = base;
+			switchinfo.isEnterAct = true;
+			switchinfo.stash = stash;
+			xTaskNotify(
+					TaskSwitchTo_Handle,
+					(uint32_t)SWITCH_ACTION_PUSH,
+					eSetBits
+			);
+		#else
+			return SwitchTo(base, true, stash);
+		#endif //Test_PageManagerRouter_FREERTOS_Notify
 }
 
 /**
@@ -182,34 +187,59 @@ bool PageManager::Pop()
     top = GetStackTop();
 
     /* Page switching execution */
-    //return SwitchTo(top, false, NULL);
-    switchinfo.newNode = top;
-    switchinfo.isEnterAct = false;
-    switchinfo.stash = NULL;
-    
-    xTaskNotify(
-        TaskSwitchTo_Handle,
-        (uint32_t)&switchinfo,
-        eSetValueWithOverwrite
-    );
+    #if Test_PageManagerRouter_FREERTOS_Notify
+			switchinfo.newNode = top;
+			switchinfo.isEnterAct = false;
+			switchinfo.stash = NULL;
+			xTaskNotify(
+					TaskSwitchTo_Handle,
+					(uint32_t)SWITCH_ACTION_POP,
+					eSetBits
+			);
+		#else
+			return SwitchTo(top, false, NULL);
+		#endif //Test_PageManagerRouter_FREERTOS_Notify
 }
 
-//__ALIGN(4) __USED __INRAM PageManager::Switch_Info_t PageManager::switchinfo = {NULL};
+#if Test_PageManagerRouter_FREERTOS_Notify
 void PageManager::TaskSwitchTo(void *pm)
 {
 		PageManager *PM = static_cast<PageManager*>(pm);
-    BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
+		if (PM == NULL) {
+        vTaskDelete(NULL); //自我销毁
+				UDEBUG("PageManager error! instance not found");
+        return;
+    }
+		uint32_t Action = 0;
+		
+		BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
+		lv_mem_monitor_t mem_mon;
     while(1)
     {
-        xReturn = xTaskNotifyWait(
-														ULONG_MAX,
-														ULONG_MAX,
-														(uint32_t *)&PM->switchinfo,
-														portMAX_DELAY
-												);
-        if(xReturn == pdPASS)
-					PM->SwitchTo(PM->switchinfo.newNode, PM->switchinfo.isEnterAct, PM->switchinfo.stash);
-    }     
+						xReturn = xTaskNotifyWait(
+																ULONG_MAX,
+																ULONG_MAX,
+																&Action,
+																portMAX_DELAY
+														);
+						if(xReturn == pdPASS)
+						if(xSemaphoreTake(PM->swMutex,portMAX_DELAY) == pdPASS){
+							SwAction_t act = static_cast<SwAction_t>(Action);
+							switch(act)
+							{
+								default:
+									PM->SwitchTo(PM->switchinfo.newNode, PM->switchinfo.isEnterAct, PM->switchinfo.stash);
+							}
+						
+						lv_mem_monitor(&mem_mon);
+						UDEBUG("LVGL Memory Used: %d/%d (%d%%),LVGL Memory Frag: %d%%\n", 
+						 mem_mon.total_size - mem_mon.free_size, 
+						 mem_mon.total_size,
+						 mem_mon.used_pct,
+						 mem_mon.frag_pct);
+						xSemaphoreGive(PM->swMutex);
+					}
+    }  		
 } 
 
 void PageManager::TaskSwitchToCreate(void)
@@ -231,6 +261,10 @@ void PageManager::TaskSwitchToCreate(void)
     
     taskEXIT_CRITICAL();
 }
+#else
+void PageManager::TaskSwitchTo(void *pm){}
+void PageManager::TaskSwitchToCreate(void){TaskSwitchTo_Handle = (TaskHandle_t)0x01;}	
+#endif //Test_PageManagerRouter_FREERTOS_Notify	
 
 /**
   * @brief  Page switching
@@ -241,8 +275,7 @@ void PageManager::TaskSwitchToCreate(void)
   */
 bool PageManager::SwitchTo(PageBase* newNode, bool isEnterAct, const PageBase::Stash_t* stash)
 {
-		xSemaphoreTake(swMutex,portMAX_DELAY);
-	
+//	if(xSemaphoreTake(this->swMutex,portMAX_DELAY) == pdPASS){
     if (newNode == NULL)
     {
         PM_LOG_ERROR("newNode is NULL");
@@ -343,7 +376,15 @@ bool PageManager::SwitchTo(PageBase* newNode, bool isEnterAct, const PageBase::S
         if (_PagePrev)lv_obj_move_foreground(_PagePrev->_root);
     }
 		
-		xSemaphoreGive(swMutex);
+		lv_mem_monitor_t mem_mon;
+		lv_mem_monitor(&mem_mon);
+						UDEBUG("LVGL Memory Used: %d/%d (%d%%),LVGL Memory Frag: %d%%\n", 
+						 mem_mon.total_size - mem_mon.free_size, 
+						 mem_mon.total_size,
+						 mem_mon.used_pct,
+						 mem_mon.frag_pct);
+//		xSemaphoreGive(this->swMutex);
+//	}
     return true;
 }
 
@@ -394,18 +435,18 @@ bool PageManager::BackHome()
 
     PageBase* home = GetStackTop();
 
-    //SwitchTo(home, false);
-
-    switchinfo.newNode = home;
-    switchinfo.isEnterAct = false;
-    switchinfo.stash = NULL;
-
-    xTaskNotify(
-        TaskSwitchTo_Handle,
-        (uint32_t)&switchinfo,
-        eSetValueWithOverwrite
-    );
-
+		#if Test_PageManagerRouter_FREERTOS_Notify
+			switchinfo.newNode = home;
+			switchinfo.isEnterAct = false;
+			switchinfo.stash = NULL;
+			xTaskNotify(
+					TaskSwitchTo_Handle,
+					(uint32_t)SWITCH_ACTION_BACKHOME,
+					eSetBits
+			);
+		#else
+			SwitchTo(home, false);
+		#endif //Test_PageManagerRouter_FREERTOS_Notify
     return true;
 }
 

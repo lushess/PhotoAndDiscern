@@ -94,6 +94,14 @@ PageBase::State_t PageManager::StateLoadExecute(PageBase* base)
     {
         PM_LOG_ERROR("Page(%s) root must be NULL", base->_Name);
     }
+		
+		lv_mem_monitor_t mem_mon;
+		lv_mem_monitor(&mem_mon);
+				UDEBUG("LVGL Memory Used: %d/%d (%d%%),LVGL Memory Frag: %d%%\n", 
+				 mem_mon.total_size - mem_mon.free_size, 
+				 mem_mon.total_size,
+				 mem_mon.used_pct,
+				 mem_mon.frag_pct);
 
     lv_obj_t* root_obj = lv_obj_create(lv_scr_act());
     

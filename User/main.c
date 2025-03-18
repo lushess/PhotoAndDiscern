@@ -48,91 +48,103 @@ static void LEDsysRunning(void);//用于指示系统处于运行
 static void AppTaskCreate(void)
 {
   BaseType_t xReturn = pdPASS;/* 定义一个创建信息返回值，默认为pdPASS */
-  
-  taskENTER_CRITICAL();           //进入临界区	
+	
+//	while(1){
 		
-	xReturn = xTaskCreate((TaskFunction_t )LEDsysRunning,  /* 任务入口函数 */
-                        (const char*    )"LEDsysRunning",/* 任务名字 */
-                        (uint16_t       )0x80,  /* 任务栈大小 */
-                        (void*          )NULL,/* 任务入口函数参数 */
-                        (UBaseType_t    )2, /* 任务的优先级 */
-                        (TaskHandle_t*  )&LEDsysRunning_Handle);/* 任务控制块指针 */ 
-	 if(pdPASS == xReturn)
-    UDEBUG("创建LEDsysRunning任务成功!\r\n");
-	 else UDEBUG("创建LEDsysRunning任务失败,错误代码:%d\r\n",(int)xReturn);
-			 
-	 xReturn = xTaskCreate((TaskFunction_t )camera_refresh,  /* 任务入口函数 */
-													(const char*    )"camera_refresh",/* 任务名字 */
+		taskENTER_CRITICAL();           //进入临界区	
+			
+		xReturn = xTaskCreate((TaskFunction_t )LEDsysRunning,  /* 任务入口函数 */
+													(const char*    )"LEDsysRunning",/* 任务名字 */
+													(uint16_t       )0x80,  /* 任务栈大小 */
+													(void*          )NULL,/* 任务入口函数参数 */
+													(UBaseType_t    )2, /* 任务的优先级 */
+													(TaskHandle_t*  )&LEDsysRunning_Handle);/* 任务控制块指针 */ 
+		 if(pdPASS == xReturn)
+			UDEBUG("创建LEDsysRunning任务成功!\r\n");
+		 else UDEBUG("创建LEDsysRunning任务失败,错误代码:%d\r\n",(int)xReturn);
+				 
+		 xReturn = xTaskCreate((TaskFunction_t )camera_refresh,  /* 任务入口函数 */
+														(const char*    )"camera_refresh",/* 任务名字 */
+														(uint16_t       )0x400,  /* 任务栈大小 */
+														(void*          )NULL,/* 任务入口函数参数 */
+														(UBaseType_t    )7, /* 任务的优先级 */
+														(TaskHandle_t*  )&camera_refresh_Handle);/* 任务控制块指针 */ 		
+		 if(pdPASS == xReturn)
+				UDEBUG("创建camera_refresh任务成功!\r\n");
+		 else UDEBUG("创建camera_refresh任务失败,错误代码:%d\r\n",(int)xReturn);
+		 
+		 xReturn = xTaskCreate((TaskFunction_t )photo,  /* 任务入口函数 */
+													(const char*    )"photo",/* 任务名字 */
 													(uint16_t       )0x400,  /* 任务栈大小 */
 													(void*          )NULL,/* 任务入口函数参数 */
-													(UBaseType_t    )7, /* 任务的优先级 */
-													(TaskHandle_t*  )&camera_refresh_Handle);/* 任务控制块指针 */ 		
-	 if(pdPASS == xReturn)
-			UDEBUG("创建camera_refresh任务成功!\r\n");
-	 else UDEBUG("创建camera_refresh任务失败,错误代码:%d\r\n",(int)xReturn);
-	 
-	 xReturn = xTaskCreate((TaskFunction_t )photo,  /* 任务入口函数 */
-                        (const char*    )"photo",/* 任务名字 */
-                        (uint16_t       )0x400,  /* 任务栈大小 */
-                        (void*          )NULL,/* 任务入口函数参数 */
-                        (UBaseType_t    )11, /* 任务的优先级 */
-                        (TaskHandle_t*  )&photo_Handle);/* 任务控制块指针 */ 
+													(UBaseType_t    )11, /* 任务的优先级 */
+													(TaskHandle_t*  )&photo_Handle);/* 任务控制块指针 */ 
+			
+		if(pdPASS == xReturn)
+			UDEBUG("创建photo任务成功!\r\n");
+		else UDEBUG("创建photo任务失败,错误代码:%d\r\n",(int)xReturn);
 		
-  if(pdPASS == xReturn)
-    UDEBUG("创建photo任务成功!\r\n");
-	else UDEBUG("创建photo任务失败,错误代码:%d\r\n",(int)xReturn);
-	
-	 xReturn = xTaskCreate((TaskFunction_t )discern,  /* 任务入口函数 */
-                        (const char*    )"discern",/* 任务名字 */
-                        (uint16_t       )0x400,  /* 任务栈大小 */
-                        (void*          )NULL,/* 任务入口函数参数 */
-                        (UBaseType_t    )10, /* 任务的优先级 */
-                        (TaskHandle_t*  )&discern_Handle);/* 任务控制块指针 */ 
-		
-  if(pdPASS == xReturn)
-    UDEBUG("创建discern任务成功!\r\n");
-	else UDEBUG("创建discern任务失败,错误代码:%d\r\n",(int)xReturn);
-		
-	xReturn = xTaskCreate((TaskFunction_t )lv_task,  /* 任务入口函数 */
-				(const char*    )"lv_task",/* 任务名字 */
-				(uint16_t       )0x200,  /* 任务栈大小 */
-				(void*          )NULL,/* 任务入口函数参数 */
-				(UBaseType_t    )30, /* 任务的优先级 */
-				(TaskHandle_t*  )&LV_Task_Handle);/* 任务控制块指针 */ 
-	if(pdPASS == xReturn)
-    UDEBUG("创建lv_task任务成功!\r\n");	
+		 xReturn = xTaskCreate((TaskFunction_t )discern,  /* 任务入口函数 */
+													(const char*    )"discern",/* 任务名字 */
+													(uint16_t       )0x400,  /* 任务栈大小 */
+													(void*          )NULL,/* 任务入口函数参数 */
+													(UBaseType_t    )10, /* 任务的优先级 */
+													(TaskHandle_t*  )&discern_Handle);/* 任务控制块指针 */ 
+			
+		if(pdPASS == xReturn)
+			UDEBUG("创建discern任务成功!\r\n");
+		else UDEBUG("创建discern任务失败,错误代码:%d\r\n",(int)xReturn);
+			
+		xReturn = xTaskCreate((TaskFunction_t )lv_task,  /* 任务入口函数 */
+					(const char*    )"lv_task",/* 任务名字 */
+					(uint16_t       )0x4000,  /* 任务栈大小 */
+					(void*          )NULL,/* 任务入口函数参数 */
+					(UBaseType_t    )22, /* 任务的优先级 */
+					(TaskHandle_t*  )&LV_Task_Handle);/* 任务控制块指针 */ 
+		if(pdPASS == xReturn)
+			UDEBUG("创建lv_task任务成功!\r\n");	
 
-	
-	lv_init();
-	UDEBUG("lvgl初始化成功!\r\n");
-	lv_port_disp_init();
-	UDEBUG("lvgl屏幕初始化成功!\r\n");
-	lv_port_indev_init();
-	UDEBUG("lvgl设备初始化成功!\r\n");
-	lv_port_fs_init();
-	UDEBUG("lvgl文件系统初始化成功!\r\n");
-	App_Init_Wrapper();
+		
+		lv_init();
+		UDEBUG("lvgl初始化成功!\r\n");
+		lv_port_disp_init();
+		UDEBUG("lvgl屏幕初始化成功!\r\n");
+		lv_port_indev_init();
+		UDEBUG("lvgl设备初始化成功!\r\n");
+		lv_port_fs_init();
+		UDEBUG("lvgl文件系统初始化成功!\r\n");
+		
+		App_Init_Wrapper();
 
-  vTaskDelete(NULL); //删除AppTaskCreate任务
-	UDEBUG("启动任务已删除!\r\n");
-  taskEXIT_CRITICAL();            //退出临界区
+		vTaskDelete(NULL); //删除AppTaskCreate任务
+		UDEBUG("启动任务已删除!\r\n");
+		
+		taskEXIT_CRITICAL();            //退出临界区
+//	}
 }
 
 static void lv_task(void)
 {
 	TickType_t xLastWakeTime;
-	const TickType_t xPeriod = pdMS_TO_TICKS( 5 );
+	const TickType_t xPeriod = pdMS_TO_TICKS( 10 );
 	xLastWakeTime = xTaskGetTickCount();
+	SemaphoreHandle_t LVGL_Mutex=xSemaphoreCreateMutex(); 
+	
 	while(1)
 	{		
-		xTaskDelayUntil(&xLastWakeTime,xPeriod);
-		xTaskNotifyGive(key_scan_task_Handle); // 键盘扫描任务
-	  lv_task_handler(); //lvgl刷新
+		if(xSemaphoreTake(LVGL_Mutex,portMAX_DELAY) == pdPASS){
+			xTaskNotifyGive(key_scan_task_Handle); // 键盘扫描任务
+			lv_task_handler(); //lvgl刷新	
+//			MemInfo_UDEBUG();	
+			xSemaphoreGive(LVGL_Mutex);
+			xTaskDelayUntil(&xLastWakeTime,xPeriod);
+		}
 	}
 }
 
 static void LEDsysRunning(void)//用于指示系统处于运行
 {
+	
 	while(1)
 	{
 	 led1=!led1;

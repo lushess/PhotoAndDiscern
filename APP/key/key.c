@@ -127,7 +127,7 @@ void key_scan_task_create(void)
                         (const char*    )"key_scan_task",/* 任务名字 */
                         (uint16_t       )0x100,  /* 任务栈大小 */
                         (void*          )NULL,/* 任务入口函数参数 */
-                        (UBaseType_t    )20, /* 任务的优先级 */
+                        (UBaseType_t    )25, /* 任务的优先级 */
                         (TaskHandle_t*  )&key_scan_task_Handle);/* 任务控制块指针 */ 
 	 if(pdPASS == xReturn)
     UDEBUG("创建key_scan_task任务成功!\r\n");

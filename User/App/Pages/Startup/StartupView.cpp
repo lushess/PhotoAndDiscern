@@ -23,8 +23,8 @@ void StartupView::Create(lv_obj_t* root)
     lv_obj_t* title_cn = lv_label_create(root);
     lv_obj_set_style_text_font(title_cn, ResourcePool::GetFont("startup"), 0);
     lv_obj_set_style_text_color(title_cn, COLOR_BROWN, 0);
-    lv_label_set_text(title_cn, "图像识别综合应用");
-    lv_obj_set_size(title_cn,200, 30);
+    lv_label_set_text(title_cn, "鍥惧儚璇嗗埆缁煎悎搴旂敤");
+    //lv_obj_set_size(title_cn,200, 30);
 	lv_obj_align(title_cn, LV_ALIGN_CENTER,0,-50);
     ui.title_cn = title_cn;
 

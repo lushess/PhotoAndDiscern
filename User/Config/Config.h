@@ -53,7 +53,9 @@
 		#if	FREERTOS_USE_EXRAM_ENABLE
 				#define FREERTOS_USE_EXRAM
 		#endif //FREERTOS_USE_EXRAM_ENABLE
-#define FREERTOS_HEAP_SIZE 	((size_t)(0x00010000))
+#define FREERTOS_HEAP_SIZE 	((size_t)(0x00020000))
 
+
+#define Test_PageManagerRouter_FREERTOS_Notify		0
 
 #endif //__CONFIG_H

@@ -23,6 +23,8 @@
 #include "PageManager.h"
 #include "PM_Log.h"
 #include <algorithm>
+#include "FreeRTOS.h"
+#include "queue.h"
 
 #define PM_EMPTY_PAGE_NAME "EMPTY_PAGE"
 
@@ -43,14 +45,13 @@ PageManager::PageManager(PageFactory* factory)
     , _PageCurrent(NULL)
     , _RootDefaultStyle(NULL)
 		, swMutex(xSemaphoreCreateMutex())
-		, isPageManagerStarted(false)
+		, swQueue(xQueueCreate(5,sizeof(Switch_Info_t)))
     
 {
     memset(&_AnimState, 0, sizeof(_AnimState));
     memset(&switchinfo,NULL,sizeof(switchinfo));
 
-    SetGlobalLoadAnimType();
-		if(TaskSwitchTo_Handle == NULL) TaskSwitchToCreate();//Create Page Switch Task
+    SetGlobalLoadAnimType();		
 }
 
 /**
@@ -66,6 +67,7 @@ PageManager::~PageManager()
 				TaskSwitchTo_Handle = NULL;
     }
 		vSemaphoreDelete(swMutex);
+		vQueueDelete(swQueue);
 }
 
 /**
@@ -116,6 +118,8 @@ PageBase* PageManager::FindPageInStack(const char* name)
   */
 bool PageManager::Install(const char* className, const char* appName)
 {
+		if(TaskSwitchTo_Handle == NULL) TaskSwitchToCreate();//Create Page Switch Task
+
     if (_Factory == NULL)
     {
         PM_LOG_ERROR("Factory was not registered, can't install page");
@@ -153,7 +157,7 @@ bool PageManager::Install(const char* className, const char* appName)
     bool retval = Register(base, appName);
 
     base->onCustomAttrConfig();
-
+		
     return retval;
 }
 
